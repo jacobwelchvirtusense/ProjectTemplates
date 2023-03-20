@@ -1,0 +1,140 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UI Sprite Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 8192
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 1
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 1
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 8
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+    - {fileID: 2800000, guid: addfa2ca9a76297409ab695c8226c5a6, type: 3}
+    - {fileID: 2800000, guid: 01b4aefdcee38e442b3e6c39c2b492de, type: 3}
+    - {fileID: 2800000, guid: bcbe0530bf204a14dbb7e75a010a9dab, type: 3}
+    - {fileID: 2800000, guid: 3b0da65308ced1c46a5ba0a09052a2cd, type: 3}
+    - {fileID: 2800000, guid: 6d6a39f8cef9f8849a789fc3314156e9, type: 3}
+    - {fileID: 2800000, guid: 3e5a8a1e581942a47b04d8f6f29606fd, type: 3}
+    - {fileID: 2800000, guid: 8cf83c79505987943a41ce3564bc30f9, type: 3}
+    - {fileID: 2800000, guid: b94a1151f558d0e439bf670e7b89ddd9, type: 3}
+    - {fileID: 2800000, guid: d12705772b9298f4cac78d056d41afb3, type: 3}
+    - {fileID: 2800000, guid: 36ab6b0764182af4999c0e619e973373, type: 3}
+    - {fileID: 2800000, guid: 47b1ed8854757b248b65b972147f76c7, type: 3}
+    - {fileID: 2800000, guid: 0edb88dd64f825d449e95eb86eeccde7, type: 3}
+    - {fileID: 2800000, guid: 15aebea29bfaac04197a65eabde014a1, type: 3}
+    - {fileID: 2800000, guid: 42ee6b6137c57bf41aa458a871dc579f, type: 3}
+    - {fileID: 2800000, guid: dd64fa47fec5cab44806e3b3103237b3, type: 3}
+    - {fileID: 2800000, guid: 2efa85c348b52134eb0472ca559cc682, type: 3}
+    - {fileID: 2800000, guid: 4c3a1ebd9403da349843079f9230a551, type: 3}
+    - {fileID: 2800000, guid: ff40dc84b84f7384380c0e8d9686bf59, type: 3}
+    - {fileID: 2800000, guid: 730d6aac5fd463d46bad566d29fceb4c, type: 3}
+    - {fileID: 2800000, guid: 25e2fec147e05154ebd15d21aa8fb554, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: bcbe0530bf204a14dbb7e75a010a9dab, type: 3}
+  - {fileID: 2006933591, guid: b94a1151f558d0e439bf670e7b89ddd9, type: 3}
+  - {fileID: 234796698, guid: b94a1151f558d0e439bf670e7b89ddd9, type: 3}
+  - {fileID: -2080722397, guid: b94a1151f558d0e439bf670e7b89ddd9, type: 3}
+  - {fileID: 692310825, guid: b94a1151f558d0e439bf670e7b89ddd9, type: 3}
+  - {fileID: 760451614, guid: 42ee6b6137c57bf41aa458a871dc579f, type: 3}
+  - {fileID: 21300000, guid: 25e2fec147e05154ebd15d21aa8fb554, type: 3}
+  - {fileID: 1667915524, guid: 15aebea29bfaac04197a65eabde014a1, type: 3}
+  - {fileID: 21300000, guid: 3b0da65308ced1c46a5ba0a09052a2cd, type: 3}
+  - {fileID: 21300000, guid: ff40dc84b84f7384380c0e8d9686bf59, type: 3}
+  - {fileID: 21300000, guid: 36ab6b0764182af4999c0e619e973373, type: 3}
+  - {fileID: 818548620, guid: dd64fa47fec5cab44806e3b3103237b3, type: 3}
+  - {fileID: 302131178, guid: d12705772b9298f4cac78d056d41afb3, type: 3}
+  - {fileID: 21300000, guid: 47b1ed8854757b248b65b972147f76c7, type: 3}
+  - {fileID: 21300000, guid: 6d6a39f8cef9f8849a789fc3314156e9, type: 3}
+  - {fileID: -1036651542, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: -1982383810, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: -1164531691, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: 1392352300, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: 665318338, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: 2031964566, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: 1415398566, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: 1217994335, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: -386991024, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: -873947946, guid: 85e5052992585d247a25698f2f80f6f6, type: 3}
+  - {fileID: 21300000, guid: 8cf83c79505987943a41ce3564bc30f9, type: 3}
+  - {fileID: -1253554668, guid: addfa2ca9a76297409ab695c8226c5a6, type: 3}
+  - {fileID: 21300000, guid: 730d6aac5fd463d46bad566d29fceb4c, type: 3}
+  - {fileID: 21300000, guid: 4c3a1ebd9403da349843079f9230a551, type: 3}
+  - {fileID: 21300000, guid: 0edb88dd64f825d449e95eb86eeccde7, type: 3}
+  - {fileID: 21300000, guid: 01b4aefdcee38e442b3e6c39c2b492de, type: 3}
+  - {fileID: 1623723842, guid: 3e5a8a1e581942a47b04d8f6f29606fd, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - timerinside-02
+  - MicrosoftTeams-image_0
+  - MicrosoftTeams-image_1
+  - MicrosoftTeams-image_2
+  - MicrosoftTeams-image_3
+  - soundoff-03_0
+  - x-06
+  - smallcard-03_0
+  - timeroutside-02
+  - returnarrow-06
+  - slider3-03
+  - soundon-03_0
+  - MicrosoftTeams-image (2)_0
+  - slider4-03
+  - Background
+  - BUTTONS-sheet-03_9
+  - BUTTONS-sheet-03_8
+  - BUTTONS-sheet-03_3
+  - BUTTONS-sheet-03_2
+  - BUTTONS-sheet-03_1
+  - BUTTONS-sheet-03_0
+  - BUTTONS-sheet-03_7
+  - BUTTONS-sheet-03_6
+  - BUTTONS-sheet-03_5
+  - BUTTONS-sheet-03_4
+  - selector-03
+  - confirmationbox-03_0
+  - slighttexturebackground-05
+  - Apple End Board
+  - slider5-03
+  - timerectangle-02
+  - select-smallcard-03_0
+  m_RenderDataMap: {}
+  m_Tag: UI Sprite Atlas
+  m_IsVariant: 0
