@@ -25,8 +25,10 @@ public class BasicButtonController : UIButtonController
     /// <summary>
     /// Gets components and sets their initial states.
     /// </summary>
-    protected virtual void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         buttons = GetComponentsInChildren<Button>();
     }
 
@@ -34,8 +36,10 @@ public class BasicButtonController : UIButtonController
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    protected override void UpdateSelectedButton(int mod)
+    public override void UpdateSelectedButton(int mod)
     {
+        base.UpdateSelectedButton(mod);
+
         currentButtonSlot = (currentButtonSlot + mod) % buttons.Length;
 
         if (currentButtonSlot < 0)
@@ -44,33 +48,16 @@ public class BasicButtonController : UIButtonController
         }
 
         buttons[currentButtonSlot].Select();
-
-        base.UpdateSelectedButton(mod);
     }
 
     /// <summary>
     /// Performs the click event of the currently selected settings slot.
     /// </summary>
-    protected override void ClickSlot()
+    public override void ClickSlot()
     {
-        buttons[currentButtonSlot].onClick.Invoke();
         base.ClickSlot();
-    }
 
-    /// <summary>
-    /// Performs an action when the user hits the back button on the remote.
-    /// </summary>
-    protected override void BackEvent()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    /// <summary>
-    /// Performs an action when the user hits the next button on the remote.
-    /// </summary>
-    protected override void NextEvent()
-    {
-        throw new System.NotImplementedException();
+        buttons[currentButtonSlot].onClick.Invoke();
     }
     #endregion
 }

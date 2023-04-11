@@ -8,6 +8,7 @@
  * Description: A base listener for all scripts that should use data from
  *              sensors.
 *********************************/
+using Assets.SensorAdapters;
 using UnityEngine;
 using Windows.Kinect;
 using static ValidCheck;
@@ -78,11 +79,11 @@ public abstract class SensorDataListener : MonoBehaviour
     /// Calls for user data to be used.
     /// </summary>
     /// <param name="body">The body of the user being tracked.</param>
-    private void SetUserData(Body body)
+    private void SetUserData(Skeleton skeleton)
     {
         if (hasFoundSensor && HasFoundUser())
         {
-            UseUserData(body);
+            UseUserData(skeleton);
         }
     }
 
@@ -90,7 +91,7 @@ public abstract class SensorDataListener : MonoBehaviour
     /// Uses the users data for some action or feedback.
     /// </summary>
     /// <param name="body">The body of the user being tracked.</param>
-    protected abstract void UseUserData(Body body);
+    protected abstract void UseUserData(Skeleton skeleton);
     #endregion
 
     /// <summary>

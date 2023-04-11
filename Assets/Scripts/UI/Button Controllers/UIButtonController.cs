@@ -8,7 +8,9 @@
  * Description: A base class for taking in all inputs to menus and handling
  *              moving between buttons in them.
 *********************************/
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
 public abstract class UIButtonController : MonoBehaviour
 {
@@ -17,66 +19,85 @@ public abstract class UIButtonController : MonoBehaviour
     /// The current button slot that is selected.
     /// </summary>
     protected int currentButtonSlot;
+
+    [Tooltip("An event that is fire when the next button is pressed on the controller")]
+    [SerializeField]
+    private UnityEvent nextEvent = new UnityEvent();
+
+    [Tooltip("An event that is fire when the rewind button is pressed on the controller")]
+    [SerializeField]
+    private UnityEvent rewindEvent = new UnityEvent();
+
+    [Tooltip("An event that is fire when the start stop button is pressed on the controller")]
+    [SerializeField]
+    private UnityEvent startStopEvent = new UnityEvent();
     #endregion
 
     #region Functions
+    /// <summary>
+    /// Sets initial events for a UI button controller.
+    /// </summary>
+    protected virtual void Awake()
+    {
+        ControllerInput.UpDownEvent.AddListener(UpdateSelectedButtonReciever);
+        ControllerInput.OkEvent.AddListener(ClickSlotReciever);
+
+        ControllerInput.StartStopEvent.AddListener(StartStopEvent);
+        ControllerInput.RewindEvent.AddListener(RewindEvent);
+        ControllerInput.NextEvent.AddListener(NextEvent);
+    }
+
     /// <summary>
     /// Resets the selected button to be the first one.
     /// </summary>
     protected virtual void OnEnable()
     {
         currentButtonSlot = 0;
-        UpdateSelectedButton(0);
+        UpdateSelectedButtonReciever(0);
     }
-
-    #region Input
-    /// <summary>
-    /// Gets keyboard inputs for testing purposes.
-    /// </summary>
-    private void Update()
-    {
-        KeyboardInput();
-    }
-
-    /// <summary>
-    /// Gets keyboard input for navigating buttons
-    /// </summary>
-    private void KeyboardInput()
-    {
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            UpdateSelectedButton(1);
-        }
-
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            UpdateSelectedButton(-1);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            ClickSlot();
-        }
-    }
-    #endregion
 
     #region Input Events
+    /// <summary>
+    /// Ensures only the active element is called.
+    /// </summary>
+    /// <param name="mod">-1 is down and 1 is up.</param>
+    protected async void UpdateSelectedButtonReciever(int mod)
+    {
+        if (!gameObject.activeInHierarchy) return;
+
+        await Task.Delay(1); // Needed to ensure execution order does not cause event to fire on multiple button controllers
+
+        UpdateSelectedButton(mod);
+    }
+
     /// <summary>
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    protected virtual void UpdateSelectedButton(int mod)
+    public virtual void UpdateSelectedButton(int mod)
     {
-        if(mod != 0)
+        if (mod != 0)
         {
             UISoundManager.PlayHoverSound();
         }
     }
 
     /// <summary>
+    /// Ensures only the active element is called.
+    /// </summary>
+    protected async void ClickSlotReciever()
+    {
+        if (!gameObject.activeInHierarchy) return;
+
+        await Task.Delay(1); // Needed to ensure execution order does not cause event to fire on multiple button controllers
+
+        ClickSlot();
+    }
+
+    /// <summary>
     /// Performs the click event of the currently selected button.
     /// </summary>
-    protected virtual void ClickSlot()
+    public virtual void ClickSlot()
     {
         UISoundManager.PlayHoverSound();
     }
@@ -84,12 +105,38 @@ public abstract class UIButtonController : MonoBehaviour
     /// <summary>
     /// Performs an action when the user hits the back button on the remote.
     /// </summary>
-    protected abstract void BackEvent();
+    protected virtual async void RewindEvent()
+    {
+        if (!gameObject.activeInHierarchy) return;
+
+        await Task.Delay(1); // Needed to ensure execution order does not cause event to fire on multiple button controllers
+
+        rewindEvent.Invoke();
+    }
 
     /// <summary>
     /// Performs an action when the user hits the next button on the remote.
     /// </summary>
-    protected abstract void NextEvent();
+    protected virtual async void NextEvent()
+    {
+        if (!gameObject.activeInHierarchy) return;
+
+        await Task.Delay(1); // Needed to ensure execution order does not cause event to fire on multiple button controllers
+
+        nextEvent.Invoke();
+    }
+
+    /// <summary>
+    /// Fires an event when the start stop button has been pressed.
+    /// </summary>
+    protected virtual async void StartStopEvent()
+    {
+        if (!gameObject.activeInHierarchy) return;
+
+        await Task.Delay(1); // Needed to ensure execution order does not cause event to fire on multiple button controllers
+
+        startStopEvent.Invoke();
+    }
     #endregion
     #endregion
 }

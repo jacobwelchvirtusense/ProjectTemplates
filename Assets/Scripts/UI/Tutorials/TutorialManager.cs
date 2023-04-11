@@ -21,6 +21,11 @@ using UnityEngine.Events;
 public class TutorialManager : MonoBehaviour
 {
     #region Fields
+    /// <summary>
+    /// The AudioSource for tutorial dialogue.
+    /// </summary>
+    private AudioSource audioSource;
+
     #region Serialized Fields
     [Tooltip("The event called when the tutorial is finished")]
     public UnityEvent EndTutorialEvent = new UnityEvent();
@@ -46,11 +51,6 @@ public class TutorialManager : MonoBehaviour
     #endregion
     #endregion
 
-    /// <summary>
-    /// The AudioSource for tutorial dialogue.
-    /// </summary>
-    private AudioSource audioSource;
-
     #region Statics
     /// <summary>
     /// Holds true if the tutorial is currently being played.
@@ -61,6 +61,24 @@ public class TutorialManager : MonoBehaviour
     /// The static instance of the tutorial manager
     /// </summary>
     private static TutorialManager Instance;
+
+    /// <summary>
+    /// The routine that the tutorial is running on.
+    /// </summary>
+    private Coroutine tutorialRoutine;
+
+    /// <summary>
+    /// Returns true if the tutorial is currently running
+    /// </summary>
+    public static bool TutorialActive
+    {
+        get
+        {
+            if (IsntValid(Instance) || IsntValid(Instance.tutorialRoutine)) return false;
+
+            return true;
+        }
+    }
     #endregion
     #endregion
 
@@ -81,7 +99,7 @@ public class TutorialManager : MonoBehaviour
     {
         InitializeTutorialValues(true);
 
-        StartCoroutine(TutorialLoop());
+        tutorialRoutine = StartCoroutine(TutorialLoop());
     }
 
     /// <summary>
@@ -93,6 +111,7 @@ public class TutorialManager : MonoBehaviour
 
         Instance.InitializeTutorialValues(false);
         Instance.StopAllCoroutines();
+        Instance.tutorialRoutine = null;
     }
 
     /// <summary>
@@ -127,6 +146,7 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
+        tutorialRoutine = null;
         EndTutorialEvent.Invoke();
         IsPlaying = false;
     }

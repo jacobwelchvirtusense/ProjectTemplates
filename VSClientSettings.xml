@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<product_name>VSClient</product_name>
+	<version>0.1</version>
+  <simulation_mode>false</simulation_mode>
+	
+	<simulator>
+		<data_file>simulator.dat</data_file>
+	</simulator>
+
+	<language_code>es-ES</language_code>
+
+	<javascript>
+		<js_frame_name>FlashFrame</js_frame_name>
+		<js_notify_function>Activity</js_notify_function>
+		<js_suppress_errors>0</js_suppress_errors>
+	</javascript>
+
+	<ui>
+		<show_cursor>1</show_cursor>
+		<show_all_borders>1</show_all_borders>
+		<show_top_border>1</show_top_border>
+		<window_position>0</window_position>
+		<context_menu>0</context_menu>
+    <allowed_screen_idle_time>300</allowed_screen_idle_time><!-- idle time is in SECONDS-->
+    <ipc_window_name>VSClient.IPC.Window</ipc_window_name>
+	</ui>
+
+	<server>
+    <!--<server1Address>http://www.virtusensetech.com</server1Address> -->
+    <server1Address>TestJSInteraction2.html</server1Address>
+    <server2Address></server2Address>
+    <!--<connectivity_check_resource>index.html</connectivity_check_resource>-->
+    <connectivity_check_resource></connectivity_check_resource>
+    <connectivty_check_delay>3000</connectivty_check_delay>
+    <out_of_service_address>http://ddg.gg</out_of_service_address>
+    <document_titles>VirtuBalance</document_titles>
+    <ping_delay>10000</ping_delay>
+	</server>
+
+	<startup>
+		<log_entry_maximum_size>5000</log_entry_maximum_size>
+		<startup_page></startup_page>
+		<startup_page_time>10</startup_page_time>
+	</startup>
+
+	<identification>
+		<primary_id>VS01</primary_id>
+		<secondary_id>VSBAL0001</secondary_id>
+	</identification>
+	
+	<plugins>
+	<plugin>
+		<name>Kinect2</name>
+		<assembly>VSKinect2Plugin.dll</assembly>
+		<type>VSKinect2Plugin.Kinect2Plugin</type>
+		<pre_init_delay>0</pre_init_delay>
+		<configs></configs>
+	</plugin>
+	
+  </plugins> 
+</configuration>
+

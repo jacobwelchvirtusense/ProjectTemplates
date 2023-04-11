@@ -18,6 +18,7 @@ using static SoundPlayer;
 using static SettingsManager;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
+using System.Threading.Tasks;
 
 [RequireComponent(typeof(AudioSource))]
 public class GameController : MonoBehaviour
@@ -27,6 +28,24 @@ public class GameController : MonoBehaviour
     /// The scene instance of the GameController.
     /// </summary>
     public static GameController Instance;
+
+    /// <summary>
+    /// The routine that designates active gameplay.
+    /// </summary>
+    private Coroutine gameplayRoutine;
+
+    /// <summary>
+    /// Returns true if the gameplay is currently active.
+    /// </summary>
+    public static bool GameplayActive
+    {
+        get
+        {
+            if (IsntValid(Instance) || IsntValid(Instance.gameplayRoutine)) return false;
+
+            return true;
+        }
+    }
 
     [Tooltip("An event that is invoked whenever the gameplay is officially started")]
     public UnityEvent StartGameplay;
@@ -178,6 +197,7 @@ public class GameController : MonoBehaviour
     }
     #endregion
 
+    #region Testing Editor Keys
     /* Editor Testing Keys
     private void Update()
     {
@@ -213,6 +233,7 @@ public class GameController : MonoBehaviour
         }
 #endif
     }*/
+    #endregion
 
     #region Updating Score
     /// <summary>
@@ -280,7 +301,7 @@ public class GameController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator CountdownLoop()
     {
-        yield return Countdown.CountdownLoop();
+        yield return gameplayRoutine = StartCoroutine(Countdown.CountdownLoop());
 
         StartGame();
     }
@@ -292,11 +313,11 @@ public class GameController : MonoBehaviour
     {
         if (IsLivesMode())
         {
-            StartCoroutine(LivesRoutine());
+            gameplayRoutine = StartCoroutine(LivesRoutine());
         }
         else
         {
-            StartCoroutine(GameTimer());
+            gameplayRoutine = StartCoroutine(GameTimer());
         }
 
         StartGameplay.Invoke();
@@ -362,7 +383,7 @@ public class GameController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        yield return EndGame();
+        yield return gameplayRoutine = StartCoroutine(EndGame());
     }
 
     /// <summary>
@@ -386,6 +407,8 @@ public class GameController : MonoBehaviour
         // Waits for game to fully complete
         if(timeBeforeEnd != 0)
         yield return new WaitForSeconds(timeBeforeEnd);
+
+        gameplayRoutine = null;
 
         // Displays all data
         UIManager.DisplayEndScreen();
@@ -423,6 +446,9 @@ public class GameController : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
+
+        BodySourceManager.CloseSensor();
+
         Application.Quit();
     }
     #endregion
@@ -430,8 +456,12 @@ public class GameController : MonoBehaviour
     /// <summary>
     /// Calls for the scene to be loaded effectively reloading the game.
     /// </summary>
-    public void PlayAgain()
+    public async void PlayAgain()
     {
+        BodySourceManager.CloseSensor();
+
+        await Task.Delay(1000); // Waits 1 second to ensure that the sensor gets uninitialized
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     #endregion

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7068686634458540170}
   - component: {fileID: 1111719857241837212}
   - component: {fileID: 5061684616481812642}
-  - component: {fileID: 6413609285578806072}
   - component: {fileID: 2892959138286280324}
   m_Layer: 5
   m_Name: Tutorial Prompt
@@ -80,19 +79,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6413609285578806072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1711220166525039563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3c2a76b3628a4c47b83c96e3a3e7fa3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  clickSound: {fileID: 8300000, guid: 8de57d4b19ec68246931f81f250a37f6, type: 3}
 --- !u!82 &2892959138286280324
 AudioSource:
   m_ObjectHideFlags: 0
@@ -376,10 +362,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 332695099417586857}
-        m_TargetAssemblyTypeName: TutorialPromptButtonsController, Assembly-CSharp
-        m_MethodName: CloseTutorialPrompt
-        m_Mode: 1
+      - m_Target: {fileID: 4374397445002228923}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -409,8 +395,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4085726685285873703}
-  - component: {fileID: 332695099417586857}
   - component: {fileID: 3544382577511938381}
+  - component: {fileID: 1107092481903169444}
   m_Layer: 5
   m_Name: Tutorial Prompt
   m_TagString: Untagged
@@ -425,7 +411,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4374397445002228923}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
@@ -440,19 +426,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 512, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &332695099417586857
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4374397445002228923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3c2a76b3628a4c47b83c96e3a3e7fa3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  clickSound: {fileID: 8300000, guid: 8de57d4b19ec68246931f81f250a37f6, type: 3}
 --- !u!82 &3544382577511938381
 AudioSource:
   m_ObjectHideFlags: 0
@@ -549,6 +522,75 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1107092481903169444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4374397445002228923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8575fa78b4803246883273b4392eb24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nextEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1107092481903169444}
+        m_TargetAssemblyTypeName: BasicButtonController, Assembly-CSharp
+        m_MethodName: UpdateSelectedButton
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  rewindEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4374397445002228923}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  startStopEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1107092481903169444}
+        m_TargetAssemblyTypeName: BasicButtonController, Assembly-CSharp
+        m_MethodName: ClickSlot
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4965492343505339633
 GameObject:
   m_ObjectHideFlags: 0
@@ -683,10 +725,10 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 332695099417586857}
-        m_TargetAssemblyTypeName: TutorialPromptButtonsController, Assembly-CSharp
-        m_MethodName: CloseTutorialPrompt
-        m_Mode: 1
+      - m_Target: {fileID: 4374397445002228923}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

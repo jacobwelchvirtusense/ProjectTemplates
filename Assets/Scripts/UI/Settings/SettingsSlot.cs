@@ -45,6 +45,14 @@ public class SettingsSlot : MonoBehaviour
     }
 
     /// <summary>
+    /// Calls for this slots click event to be invoked.
+    /// </summary>
+    public void ClickSlot()
+    {
+        ClickEvent.Invoke();
+    }
+
+    /// <summary>
     /// Sets the hover state of this settings slot.
     /// </summary>
     /// <param name="shouldSet">Holds true if this slot should be hovered over currently.</param>

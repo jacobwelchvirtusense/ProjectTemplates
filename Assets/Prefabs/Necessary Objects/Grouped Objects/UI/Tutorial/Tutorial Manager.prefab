@@ -56,7 +56,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EndTutorialEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: GameController, Assembly-CSharp
+        m_MethodName: PlayAgain
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   tutorialElements:
   - <TutorialName>k__BackingField: Text Example
     <SubtitleText>k__BackingField: This is an example text to show you how text can
@@ -73,7 +85,7 @@ MonoBehaviour:
   - <TutorialName>k__BackingField: Video Example
     <SubtitleText>k__BackingField: This is an example video to show you how a video
       is played
-    <VideoClip>k__BackingField: {fileID: 32900000, guid: 0086d3b9ae2040649ae26b2a1e7e01db, type: 3}
+    <VideoClip>k__BackingField: {fileID: 32900000, guid: 515ff6da7770cc245ba28efd3adef190, type: 3}
     <AudioDialogue>k__BackingField: {fileID: 0}
     <DialogueVolume>k__BackingField: 1
     <DelayBefore>k__BackingField: 0

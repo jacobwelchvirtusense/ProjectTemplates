@@ -7,14 +7,11 @@
  * 
  * Description: Handles movement of the basket based on player input.
 *********************************/
-using System.Collections;
+using Assets.SensorAdapters;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
-using Windows.Kinect;
-using Joint = Windows.Kinect.Joint;
-using static ValidCheck;
+using Joint = Assets.SensorAdapters.Joint;
 
 public class PlayerMovementExample : SensorDataListener
 {
@@ -147,16 +144,16 @@ public class PlayerMovementExample : SensorDataListener
     #endregion
 
     #region Input Handling
-    protected override void UseUserData(Body body)
+    protected override void UseUserData(Skeleton skeleton)
     {
-        RefreshBodyObject(body);
+        RefreshBodyObject(skeleton);
     }
 
     /// <summary>
     /// Refreshes the events from body movement input.
     /// </summary>
     /// <param name="body">The body being checked.</param>
-    private void RefreshBodyObject(Body body)
+    private void RefreshBodyObject(Skeleton skeleton)
     {
         var targetPos = 0.0f;
         var movementSmoothing = 0.0f;
@@ -165,7 +162,7 @@ public class PlayerMovementExample : SensorDataListener
         {
             #region Move Mode
             case MovementType.MOVE:
-                targetPos = CalculateMoveTargetPosition(body.Joints[moveJoints[0]].Position.X);
+                targetPos = CalculateMoveTargetPosition(skeleton.joints[(int)moveJoints[0]].position.x);
                 movementSmoothing = moveMovementSmoothing;
                 break;
             #endregion
@@ -174,10 +171,10 @@ public class PlayerMovementExample : SensorDataListener
             case MovementType.CATCH:
 
                 //Vector2 centerXCatch = new Vector2(body.Joints[JointType.SpineShoulder].Position.X, body.Joints[JointType.SpineShoulder].Position.Z);
-                var center = GetVector3FromJoint(body.Joints[JointType.SpineShoulder]);
+                var center = GetVector3FromJoint(skeleton.joints[(int)JointType.SpineShoulder]);
                 center.x -= 0.0f;
-                var handVector1 = GetVector3FromJoint(body.Joints[handJoints[0]]);
-                var handVector2 = GetVector3FromJoint(body.Joints[handJoints[1]]);
+                var handVector1 = GetVector3FromJoint(skeleton.joints[(int)handJoints[0]]);
+                var handVector2 = GetVector3FromJoint(skeleton.joints[(int)handJoints[1]]);
                 var handVector = (handVector1 + handVector2)/2;
                 handVector.y = center.y;
 
@@ -218,7 +215,7 @@ public class PlayerMovementExample : SensorDataListener
 
             #region Lean Mode
             case MovementType.LEAN:
-                var dir = ((Vector2)(GetVector3FromJoint(body.Joints[leanJoints[0]]) - GetVector3FromJoint(body.Joints[leanJoints[1]])));
+                var dir = ((Vector2)(GetVector3FromJoint(skeleton.joints[(int)leanJoints[0]]) - GetVector3FromJoint(skeleton.joints[(int)leanJoints[1]])));
                 dir.x -= 0.2f;
 
                 var angle = (180 - Vector2.Angle(dir, Vector2.up)) * -Mathf.Sign(dir.x);
@@ -241,7 +238,7 @@ public class PlayerMovementExample : SensorDataListener
     /// <returns></returns>
     private Vector3 GetVector3FromJoint(Joint joint)
     {
-        return new Vector3(joint.Position.X * playerSize, joint.Position.Y * playerSize, joint.Position.Z * playerSize);
+        return new Vector3(joint.position.x * playerSize, joint.position.y * playerSize, joint.position.z * playerSize);
     }
     #endregion
 

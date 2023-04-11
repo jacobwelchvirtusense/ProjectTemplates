@@ -247,3 +247,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   videoPlayer: {fileID: 434515638060666457}
+  replayLastVideo: {fileID: 32900000, guid: 0086d3b9ae2040649ae26b2a1e7e01db, type: 3}

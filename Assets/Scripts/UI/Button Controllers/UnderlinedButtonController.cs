@@ -38,7 +38,7 @@ public class UnderlinedButtonController : BasicButtonController
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    protected override void UpdateSelectedButton(int mod)
+    public override void UpdateSelectedButton(int mod)
     {
         var previousButtonSlot = currentButtonSlot;
 

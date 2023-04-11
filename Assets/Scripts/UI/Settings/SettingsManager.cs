@@ -7,7 +7,6 @@
  * 
  * Description: Handles the inputs into the settings menu and hooks to its changes.
 *********************************/
-using com.rfilkov.kinect;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,8 +68,10 @@ public class SettingsManager : UIButtonController
     /// <summary>
     /// Gets components and sets their initial states.
     /// </summary>
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         settingsSlots = GetComponentsInChildren<SettingsSlot>();
         Instance = this;
 
@@ -118,82 +119,35 @@ public class SettingsManager : UIButtonController
         gameObject.SetActive(false);
     }
 
-    #region Show Sensor Data
-    /// <summary>
-    /// Displays sensor data if this menu is enabled.
-    /// </summary>
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-
-        DisplaySensorData(true);
-    }
-
-    /// <summary>
-    /// Disables sensor data if this menu is enabled.
-    /// </summary>
-    private void OnDisable()
-    {
-        DisplaySensorData(false);
-    }
-
-    /// <summary>
-    /// Enables or disables the sensor data feedback.
-    /// </summary>
-    /// <param name="shouldShow">Holds true if the data should be shown.</param>
-    private void DisplaySensorData(bool shouldShow)
-    {
-        var kinnectManager = FindObjectOfType<KinectManager>();
-
-        if (IsntValid(kinnectManager)) return;
-
-        kinnectManager.shouldDisplaySensorData = shouldShow;
-    }
-    #endregion
-
     #region Button Events
     /// <summary>
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    protected override void UpdateSelectedButton(int mod)
+    public override void UpdateSelectedButton(int mod)
     {
-        settingsSlots[currentSettingsSlot].SetHover(false);
-        currentSettingsSlot = (currentSettingsSlot+mod) % settingsSlots.Length;
+        base.UpdateSelectedButton(mod);
 
-        if(currentSettingsSlot < 0)
+        settingsSlots[currentSettingsSlot].SetHover(false);
+        currentSettingsSlot = (currentSettingsSlot + mod) % settingsSlots.Length;
+
+        if (currentSettingsSlot < 0)
         {
             currentSettingsSlot = settingsSlots.Length - 1;
         }
 
         settingsSlots[currentSettingsSlot].SetHover(true);
-
-        base.UpdateSelectedButton(mod);
     }
 
     /// <summary>
     /// Performs the click event of the currently selected settings slot.
     /// </summary>
-    protected override void ClickSlot()
+    public override void ClickSlot()
     {
-        settingsSlots[currentSettingsSlot].ClickEvent.Invoke();
         base.ClickSlot();
-    }
 
-    /// <summary>
-    /// Performs an action when the user hits the back button on the remote.
-    /// </summary>
-    protected override void BackEvent()
-    {
-        throw new System.NotImplementedException();
-    }
+        settingsSlots[currentSettingsSlot].ClickEvent.Invoke();
 
-    /// <summary>
-    /// Performs an action when the user hits the next button on the remote.
-    /// </summary>
-    protected override void NextEvent()
-    {
-        throw new System.NotImplementedException();
     }
     #endregion
 

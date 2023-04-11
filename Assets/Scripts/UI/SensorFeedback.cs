@@ -8,10 +8,10 @@
  * Description: Gives feedback to the user on where they should stand 
  *              within the space of the sensor.
 *********************************/
-using System.Collections.Generic;
+using Assets.SensorAdapters;
 using TMPro;
 using UnityEngine;
-using Windows.Kinect;
+using UnityEngine.UI;
 using static ValidCheck;
 
 public class SensorFeedback : SensorDataListener
@@ -26,6 +26,13 @@ public class SensorFeedback : SensorDataListener
     /// Holds true if messages from here are allowed to be shown.
     /// </summary>
     private bool canShowMessage = true;
+
+    // TODO
+    #region Data Visualization
+    [SerializeField] private RawImage sensorDataImage;
+    private Texture2D sensorTexture;
+    Color32[] bodyIndexColors;
+    #endregion
 
     #region Distance from sensor
     [Header("Distance From Sensor")]
@@ -80,6 +87,50 @@ public class SensorFeedback : SensorDataListener
         base.Awake();
     }
 
+    #region Sensor Data Visualization
+    public void InitializeTexture(ImageSize bodyIndexImageSize)
+    {
+        sensorTexture = new Texture2D(bodyIndexImageSize.Width, bodyIndexImageSize.Height);
+
+        if (sensorDataImage)
+            sensorDataImage.texture = sensorTexture;
+    }
+
+    public void OnNewBodyIndexFrame(object sender, GenericEventArgs<BodyIndexFrame> e)
+    {
+        if (e.Args != null) BodyIndexReader_FrameArrived(e);
+    }
+
+    void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
+    {
+
+        var bodyColor = new Color32(0, 255, 0, 255);
+
+        if (bodyIndexColors == null || bodyIndexColors.Length != bodyIndexData.Args.PixelCount)
+        {
+            bodyIndexColors = new Color32[bodyIndexData.Args.PixelCount];
+        }
+
+        for (int i = 0; i < bodyIndexColors.Length; i++)
+        {
+            byte index = bodyIndexData.Args.Pixels[i];
+
+            if (index != 255)
+            {
+                bodyIndexColors[i] = new Color32(0, 255, 0, 255); // green; displays most of the time
+
+            }
+            else
+            {
+                bodyIndexColors[i] = new Color32(32, 32, 32, 50); // black for background
+            }
+        }
+
+        sensorTexture.SetPixels32(bodyIndexColors);
+        sensorTexture.Apply();
+    }
+    #endregion
+
     /// <summary>
     /// Sets whether or not the sensor has been found.
     /// </summary>
@@ -116,9 +167,9 @@ public class SensorFeedback : SensorDataListener
     /// Uses the user body data to display feedback to them on positioning.
     /// </summary>
     /// <param name="body">The body currently being tracked.</param>
-    protected override void UseUserData(Body body)
+    protected override void UseUserData(Skeleton skeleton)
     {
-        DisplayFeedback(body.Joints[JointType.SpineBase].Position);
+        DisplayFeedback(skeleton.joints[(int)JointType.SpineBase].position);
     }
 
     /// <summary>
@@ -141,21 +192,21 @@ public class SensorFeedback : SensorDataListener
     /// Displays feedback to the user based on there position relative to the sensor.
     /// </summary>
     /// <param name="position">The position in the camera space of the sensor.</param>
-    private void DisplayFeedback(CameraSpacePoint position)
+    private void DisplayFeedback(Vector3 position)
     {
-        if (position.Z < minZDist)
+        if (position.z < minZDist)
         {
             SetText(zDistCloseMessage);
         }
-        else if (position.Z > maxZDist)
+        else if (position.z > maxZDist)
         {
             SetText(zDistFarMessage);
         }
-        else if (position.X < -maxXDist)
+        else if (position.x < -maxXDist)
         {
             SetText(moveRightMessage);
         }
-        else if (position.X > maxXDist)
+        else if (position.x > maxXDist)
         {
             SetText(moveLeftMessage);
         }

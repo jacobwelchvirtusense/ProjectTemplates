@@ -7,10 +7,10 @@
  * 
  * Description: The start of a playermovement script.
 ******************************************************************/
+using Assets.SensorAdapters;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Windows.Kinect;
 using static InspectorValues;
 using static ValidCheck;
 
@@ -27,7 +27,7 @@ public class PlayerMovement : SensorDataListener
     #endregion
 
     #region Functions
-    protected override void UseUserData(Body body)
+    protected override void UseUserData(Skeleton skeleton)
     {
         throw new System.NotImplementedException();
     }

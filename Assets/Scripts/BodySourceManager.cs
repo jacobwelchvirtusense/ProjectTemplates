@@ -8,23 +8,52 @@
  * Description: Handles the registering and tracking of users bodies.
 *********************************/
 using UnityEngine;
-using Windows.Kinect;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using static ValidCheck;
+using Assets.AzureKinect;
+using Assets.Kinect;
+using Assets.SensorAdapters;
 
 public class BodySourceManager : MonoBehaviour 
 {
     #region Fields
-    [Range(1f, 1f)]
-    [Tooltip("Holds the number of users to currently track (only 1 supported atm)")]
-    [SerializeField] private int numberOfUsersToTrack = 1;
+    /// <summary>
+    /// The scene instance of the BodySourceManager.
+    /// </summary>
+    private static BodySourceManager Instance;
 
+    #region Plugin & Sensors
+    /// <summary>
+    /// Defines which sensor should be initialized as the kinnectSensor.
+    /// </summary>
+    private PluginSettings pluginSettings = new PluginSettings();
+
+    /// <summary>
+    /// Returns the type of sensor currently being used.
+    /// </summary>
+    public static SensorType CurrentSensorUsed 
+    { 
+        get
+        {
+            if (Instance == null || Instance.pluginSettings == null) return SensorType.KINNECTV2;
+
+            return Instance.pluginSettings.SensorType;
+        } 
+    }
+
+    /// <summary>
+    /// The kinnect sensor that has been initialized.
+    /// </summary>
+    private ISensorAdapter kinnectSensor;
+    #endregion
+
+    #region Data Events & Backing Fields
     /// <summary>
     /// An event that is fired every time sensor data is updated.
     /// </summary>
-    [HideInInspector] public UnityEvent<Body> SensorDataUpdateEvent = new UnityEvent<Body>();
+    [HideInInspector] public UnityEvent<Skeleton> SensorDataUpdateEvent = new UnityEvent<Skeleton>();
 
     /// <summary>
     /// An event that is fired every time a sensor is found or not found
@@ -32,38 +61,42 @@ public class BodySourceManager : MonoBehaviour
     [HideInInspector] public UnityEvent<bool> SensorFoundEvent = new UnityEvent<bool>();
 
     /// <summary>
-    /// An event that is fired users are found or unfound.
-    /// </summary>
-    [HideInInspector] public UnityEvent<int> UsersFoundEvent = new UnityEvent<int>();
-
-    /// <summary>
     /// Holds true if sensor data has been found.
     /// </summary>
     private bool hasFoundSensor = true;
 
     /// <summary>
+    /// An event that is fired users are found or unfound.
+    /// </summary>
+    [HideInInspector] public UnityEvent<int> UsersFoundEvent = new UnityEvent<int>();
+
+    /// <summary>
     /// Holds the number of users found and tracked.
     /// </summary>
     private int numberOfUsersFound = -1;
+    #endregion
 
-    /// <summary>
-    /// The sensor that is currently being used.
-    /// </summary>
-    private KinectSensor kinnectSensor;
-
-    /// <summary>
-    /// The frame reader for bodies.
-    /// </summary>
-    private BodyFrameReader bodyFrameReader;
+    [Range(1f, 1f)]
+    [Tooltip("Holds the number of users to currently track (only 1 supported atm)")]
+    [SerializeField] private int numberOfUsersToTrack = 1;
 
     /// <summary>
     /// The array of all body data currently found.
     /// </summary>
-    private Body[] bodyData = null;
+    private List<Skeleton> skeletonData = null;
     #endregion
+
 
     #region Functions
     #region Initialization
+    /// <summary>
+    /// Initializes the scene instance of the bodysourcemanager.
+    /// </summary>
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     /// <summary>
     /// Initializes the kinnect sensor and its body reader.
     /// </summary>
@@ -74,7 +107,8 @@ public class BodySourceManager : MonoBehaviour
 
         StartCoroutine(CheckForSensor());
     }
-    
+
+    #region Initialize Sensor  
     /// <summary>
     /// Checks for an active sensor if the current one does not exist anymore.
     /// </summary>
@@ -97,32 +131,129 @@ public class BodySourceManager : MonoBehaviour
     /// </summary>
     private void InitializeSensor()
     {
-        kinnectSensor = KinectSensor.GetDefault();
+        SelectSensorToBeUsed();
 
-        if (IsValid(kinnectSensor))
+        kinnectSensor.Initialize();
+
+        InitializeSensorEventListeners();
+    }
+
+    /// <summary>
+    /// Selects a sensor to be used and constructs it.
+    /// </summary>
+    private void SelectSensorToBeUsed()
+    {
+        pluginSettings.LoadPluginSettings();
+
+        switch (pluginSettings.SensorType)
         {
-            if (!kinnectSensor.IsOpen)
+            case SensorType.AZUREKINNECT:
+                kinnectSensor = new AzureKinectAdapter();
+                print("AzureKinect Adapter Initialized!");
+                break;
+            case SensorType.KINNECTV2:
+            default:
+                kinnectSensor = new KinectAdapter();
+                print("KinectV2 Adapter Initialized!");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Initializes frame data listeners for the kinnect sensor.
+    /// </summary>
+    private void InitializeSensorEventListeners()
+    {
+        kinnectSensor.skeletonFrameReady += OnSkeletonFrameReady;
+
+        // Initializes the sensor feedback listener
+        var sensorFeedbackHandler = FindObjectOfType<SensorFeedback>();
+        if (sensorFeedbackHandler)
+        {
+            sensorFeedbackHandler.InitializeTexture(kinnectSensor.BodyIndexImageSize);
+            kinnectSensor.bodyIndexFrameReady += sensorFeedbackHandler.OnNewBodyIndexFrame;
+        }
+    }
+    #endregion
+    #endregion
+
+    #region Event Updates
+    /// <summary>
+    /// Handles the event of new skeleton data being recieved.
+    /// </summary>
+    /// <param name="sender">The object sending the data.</param>
+    /// <param name="skeletonFrameData">The skeleton frame data.</param>
+    private void OnSkeletonFrameReady(object sender, GenericEventArgs<SkeletonFrame> skeletonFrameData)
+    {
+        skeletonData = skeletonFrameData.Args.skeletons;
+
+        TrackUsers();
+    }
+
+    #region Frame Updates
+    /// <summary>
+    /// Tracks users and sends out their body data to all listening scripts.
+    /// </summary>
+    private void TrackUsers()
+    {
+        if(numberOfUsersToTrack == 1)
+        {
+            // TODO Find better way of ensuring users don't steal sensor from each other
+            #region Get Kinect Data
+            ChangeSensorFound(skeletonData != null);
+
+            if (skeletonData == null) return;
+
+            List<ulong> _trackedIds = new List<ulong>();
+
+            ulong centerID = 0;
+            float currentLow = Mathf.Infinity;
+
+            foreach (var skeleton in skeletonData)
             {
-                kinnectSensor.Open();
+                if (skeleton == null) continue;
+
+                var lowCheck = Mathf.Abs(skeleton.joints[(int)JointType.SpineBase].position.x);
+
+                if (skeleton.IsTracked() && lowCheck < currentLow)
+                {
+                    centerID = skeleton.trackingId;
+                    currentLow = lowCheck;
+                }
             }
 
-            if (IsntValid(bodyFrameReader))
+            if (centerID != 0) _trackedIds.Add(centerID);
+            #endregion
+
+            #region Create & Refresh Kinect Bodies
+            ChangeUsersFound(_trackedIds.Count);
+
+            foreach (var skeleton in skeletonData)
             {
-                bodyFrameReader = kinnectSensor.BodyFrameSource.OpenReader();
-                bodyFrameReader.FrameArrived += NewBodyFrameUpdate;
+                if (skeleton == null) continue;
+
+                if (skeleton.IsTracked() && skeleton.trackingId == centerID)
+                {
+                    SensorDataUpdateEvent.Invoke(skeleton);
+                }
             }
+            #endregion
+        }
+        else
+        {
+            // TODO Do something with more users
         }
     }
     #endregion
 
-    #region Event Updates
+    #region Change Sensor State
     /// <summary>
     /// Updates whether the sensor has been found or not.
     /// </summary>
     /// <param name="newFoundState">The new status of the sensor having been found.</param>
     private void ChangeSensorFound(bool newFoundState)
     {
-        if(newFoundState != hasFoundSensor)
+        if (newFoundState != hasFoundSensor)
         {
             hasFoundSensor = newFoundState;
             SensorFoundEvent.Invoke(hasFoundSensor);
@@ -135,120 +266,31 @@ public class BodySourceManager : MonoBehaviour
     /// <param name="newNumberOfBodiesFound">Updates the amount of detected users by the sensor.</param>
     private void ChangeUsersFound(int newNumberOfBodiesFound)
     {
-        if(newNumberOfBodiesFound != numberOfUsersFound)
+        if (newNumberOfBodiesFound != numberOfUsersFound)
         {
             numberOfUsersFound = newNumberOfBodiesFound;
             UsersFoundEvent.Invoke(numberOfUsersFound);
         }
     }
-
-    #region Frame Updates
-    /// <summary>
-    /// Gets the most recent updated frame and sends out its data.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void NewBodyFrameUpdate(object sender, BodyFrameArrivedEventArgs e)
-    {
-        UpdateFrame();
-        TrackUsers();
-    }
-
-    /// <summary>
-    /// Gets the most recent frame and disposes of it to clear the pointers location for new frames.
-    /// </summary>
-    private void UpdateFrame()
-    {
-        if (bodyFrameReader != null)
-        {
-            var frame = bodyFrameReader.AcquireLatestFrame();
-
-            if (frame != null)
-            {
-                print("Current Time: " + Time.time);
-                bodyData = new Body[kinnectSensor.BodyFrameSource.BodyCount];
-                
-                frame.GetAndRefreshBodyData(bodyData);
-                frame.Dispose();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Tracks users and sends out their body data to all listening scripts.
-    /// </summary>
-    private void TrackUsers()
-    {
-        if(numberOfUsersToTrack == 1)
-        {
-            #region Get Kinect Data
-            ChangeSensorFound(bodyData != null);
-
-            if (bodyData == null) return;
-
-            List<ulong> _trackedIds = new List<ulong>();
-
-            ulong centerID = 0;
-            float currentLow = Mathf.Infinity;
-
-            foreach (var body in bodyData)
-            {
-                if (body == null) continue;
-
-                var lowCheck = Mathf.Abs(body.Joints[JointType.SpineBase].Position.X);
-
-                if (body.IsTracked && lowCheck < currentLow)
-                {
-                    centerID = body.TrackingId;
-                    currentLow = lowCheck;
-                }
-            }
-
-            if (centerID != 0) _trackedIds.Add(centerID);
-            #endregion
-
-            #region Create & Refresh Kinect Bodies
-            ChangeUsersFound(_trackedIds.Count);
-
-            foreach (var body in bodyData)
-            {
-                if (body == null) continue;
-
-                if (body.IsTracked && body.TrackingId == centerID)
-                {
-                    SensorDataUpdateEvent.Invoke(body);
-                }
-            }
-            #endregion
-        }
-        else
-        {
-            // Do something with more users
-        }
-    }
     #endregion
     #endregion
 
+    #region Uninitialize Sensors
     /// <summary>
-    /// Disposes of objects that no longer need to have connections.
+    /// Ensures the kinnect sensor will be unitialized when closing the application.
     /// </summary>
-    void OnApplicationQuit()
+    private void OnApplicationQuit()
     {
-        if (bodyFrameReader != null)
-        {
-            bodyFrameReader.Dispose();
-            bodyFrameReader = null;
-        }
-        
-        if (kinnectSensor != null)
-        {
-            if (kinnectSensor.IsOpen)
-            {
-                kinnectSensor.Close();
-            }
-
-            kinnectSensor = null;
-        }
+        CloseSensor();
     }
+
+    /// <summary>
+    /// Closes the kinnect sensor and unitializes it.
+    /// </summary>
+    public static void CloseSensor()
+    {
+        Instance.kinnectSensor.UnInitialize();
+    }
+    #endregion
     #endregion
 }
