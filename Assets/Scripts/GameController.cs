@@ -48,6 +48,28 @@ public class GameController : MonoBehaviour
         }
     }
 
+    [Range(0.0f, 5.0f)]
+    [Tooltip("The count down time before starting")]
+    [SerializeField] private float timeBeforeEnd = 0.0f;
+
+    #region Game Routines
+    [Tooltip("The starter for time routines")]
+    [SerializeField] private IGameRoutine timeRoutineStarter;
+
+    [Tooltip("The starter for life routines")]
+    [SerializeField] private IGameRoutine lifeRoutineStarter;
+
+    [Tooltip("Set to true if the game should use the lives routine")]
+    [SerializeField] private bool useLifeRoutine = false;
+
+    /// <summary>
+    /// The reference to the current routine being used for gameplay.
+    /// </summary>
+    private IGameRoutine currentGameplayroutine;
+    #endregion
+
+    [Space(SPACE_BETWEEN_EDITOR_ELEMENTS)]
+
     [Tooltip("An event that is invoked whenever the gameplay is officially started")]
     public UnityEvent StartGameplay;
 
@@ -107,41 +129,6 @@ public class GameController : MonoBehaviour
     }
     #endregion
 
-    #region Timing
-    [Header("Timing")]
-    [Tooltip("Holds true if there should be a transparent countdown in the last 3 seconds of the training")]
-    [SerializeField] private bool showCountdownToEnd = false;
-
-    [Range(0.0f, 5.0f)]
-    [Tooltip("The count down time before starting")]
-    [SerializeField] private float timeBeforeEnd = 1.0f;
-
-    [Tooltip("The minimum value for the timer in seconds")]
-    [SerializeField] private int[] timers = new int[] { 30, 60, 120 };
-
-    [Space(SPACE_BETWEEN_EDITOR_ELEMENTS)]
-    #endregion
-
-    #region Lives Mode
-    /// <summary>
-    /// The current number of lives left for the user.
-    /// </summary>
-    private int livesLeft = 3;
-
-    /// <summary>
-    /// A getter and setter for the number of lives left.
-    /// </summary>
-    public int LivesLeft
-    {
-        get => livesLeft;
-        set
-        {
-            livesLeft = value;
-            UIManager.UpdateLivesLeft(livesLeft);
-        }
-    }
-    #endregion
-
     #region Sound
     /// <summary>
     /// The AudioSource for game state events.
@@ -178,7 +165,24 @@ public class GameController : MonoBehaviour
     {
         Instance = this;
 
+        if (useLifeRoutine)
+        {
+            currentGameplayroutine = lifeRoutineStarter;
+        }
+        else
+        {
+            currentGameplayroutine = timeRoutineStarter;
+        }
+
         InitializeComponents();
+    }
+
+    /// <summary>
+    /// Performs calls on components to initialize them.
+    /// </summary>
+    private void Start()
+    {
+        currentGameplayroutine.SetActive(true);
     }
 
     /// <summary>
@@ -312,88 +316,22 @@ public class GameController : MonoBehaviour
     /// </summary>
     private void StartGame()
     {
-        if (IsLivesMode())
-        {
-            gameplayRoutine = StartCoroutine(LivesRoutine());
-        }
-        else
-        {
-            gameplayRoutine = StartCoroutine(GameTimer());
-        }
+        gameplayRoutine = StartCoroutine(GameplayRoutine());
 
         StartGameplay.Invoke();
     }
-    #endregion
 
-    #region Timer
     /// <summary>
-    /// The timer for the length of the game.
+    /// Handles the routine of gameplay and the end game routine.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator GameTimer()
+    private IEnumerator GameplayRoutine()
     {
-        float t = GetTimerAmount();
-
-        do
-        {
-            UIManager.UpdateTimer(t);
-            yield return new WaitForEndOfFrame();
-
-            CheckForCountdownToEnd(t);
-
-            t -= Time.deltaTime;
-        }
-        while (t > 0);
+        yield return currentGameplayroutine.GameplayRoutine();
 
         yield return EndGame();
-    }
 
-    /// <summary>
-    /// Checks if the the transparent countdown for the end of the training should
-    /// be shown.
-    /// </summary>
-    /// <param name="t">The current time left in the training.</param>
-    private void CheckForCountdownToEnd(float t)
-    {
-        if (showCountdownToEnd && t < 4.0f)
-        {
-            showCountdownToEnd = false;
-            Countdown.ShowTransparentCountdown();
-        }
-    }
-
-    /// <summary>
-    /// Returns the current starting timer that is being used in the game.
-    /// </summary>
-    /// <returns></returns>
-    public static int GetTimerAmount()
-    {
-        return Instance.timers[GetTimerSlot()];
-    }
-    #endregion
-
-    #region Lives Mode
-    /// <summary>
-    /// Waits until the user has run out of lives and then ends the game.
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator LivesRoutine()
-    {
-        while(livesLeft != 0)
-        {
-            yield return new WaitForEndOfFrame();
-        }
-
-        yield return gameplayRoutine = StartCoroutine(EndGame());
-    }
-
-    /// <summary>
-    /// Returns true if the current gameplay is a lives mode.
-    /// </summary>
-    /// <returns></returns>
-    public static bool IsLivesMode()
-    {
-        return GetTimerAmount() == -1;
+        gameplayRoutine = null;
     }
     #endregion
 
@@ -408,8 +346,6 @@ public class GameController : MonoBehaviour
         // Waits for game to fully complete
         if(timeBeforeEnd != 0)
         yield return new WaitForSeconds(timeBeforeEnd);
-
-        gameplayRoutine = null;
 
         // Displays all data
         UIManager.DisplayEndScreen();
@@ -466,8 +402,7 @@ public class GameController : MonoBehaviour
     {
         BodySourceManager.CloseSensor();
 
-        if(BodySourceManager.IsAzureKinnect)
-        await Task.Delay(1000); // Waits 1 second to ensure that the sensor gets uninitialized
+        if(BodySourceManager.IsAzureKinnect) await Task.Delay(1000); // Waits 1 second to ensure that the sensor gets uninitialized
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

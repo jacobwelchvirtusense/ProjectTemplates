@@ -34,24 +34,26 @@ public class WheelChairMovement : SensorDataListener
     [Tooltip("The maximum x position the in-game character will be based on user XPos")]
     [SerializeField] private float maxCharacterXPos = 10.0f;
 
-
-
     [Tooltip("The maximum Y position the in-game character will be based on user ZPos")]
     [SerializeField] private float maxCharacterYPos = 8.0f;
 
     [Tooltip("The amount of smoothing to be applied to the movement to reduce jittering")]
     [SerializeField] private float movementSmoothing = 10;
 
-    #region ToDO
-    [Tooltip("")]
+    [Header("Extra movement settings")]
+    [Tooltip("Clamps the users movement to be solely on the x axis")]
     [SerializeField] private bool clampToX;
 
-    [Tooltip("")]
+    [Tooltip("Clamps the users movement to be solely on the y axis")]
     [SerializeField] private bool clampToY;
- 
-    [Tooltip("")]
+
+    [Tooltip("Inverts the movement inputs of the user")]
     [SerializeField] private bool invertInput;
-    #endregion
+
+    /// <summary>
+    /// The position that this object started at.
+    /// </summary>
+    private Vector3 startingPosition;
 
     /// <summary>
     /// The time the last frame from the sensor was recieved.
@@ -65,14 +67,51 @@ public class WheelChairMovement : SensorDataListener
     #endregion
 
     #region Functions
+    protected override void Awake()
+    {
+        base.Awake();
+
+        startingPosition = transform.position;
+    }
+
+    /// <summary>
+    /// Uses the users data to move their in-game character.
+    /// </summary>
+    /// <param name="skeleton">The skeleton of the user.</param>
     protected override void UseUserData(Skeleton skeleton)
     {
-        var targetPositionLerpX = Mathf.InverseLerp(-maxUserXPos, maxUserXPos, skeleton.joints[(int)headJoint].position.x); // Calculates the lerp of the angle
-        var targetPositionLerpZ = Mathf.InverseLerp(maxUserZPos, minUserZPos, skeleton.joints[(int)headJoint].position.z); // Calculates the lerp of the angle
+        #region Taking input and calculating target position
+        var xInput = skeleton.joints[(int)headJoint].position.x;
+        var zInput = skeleton.joints[(int)headJoint].position.z;
 
-        var targetX = Mathf.Lerp(-maxCharacterXPos, maxCharacterXPos, targetPositionLerpX);
-        var targetY = Mathf.Lerp(-maxCharacterYPos, maxCharacterYPos, targetPositionLerpZ);
+        var targetPositionLerpX = Mathf.InverseLerp(-maxUserXPos, maxUserXPos, xInput); // Calculates the lerp of the angle
+        var targetPositionLerpZ = Mathf.InverseLerp(maxUserZPos, minUserZPos, zInput); // Calculates the lerp of the angle
 
+
+        if (invertInput)
+        {
+            var holdXInput = targetPositionLerpX;
+            targetPositionLerpX = targetPositionLerpZ;
+            targetPositionLerpZ = holdXInput;
+        }
+
+        var targetX = Mathf.Lerp(-maxCharacterXPos, maxCharacterXPos, targetPositionLerpX) + startingPosition.x;
+        var targetY = Mathf.Lerp(-maxCharacterYPos, maxCharacterYPos, targetPositionLerpZ) + startingPosition.y;
+        #endregion
+
+        #region Clamping Inputs
+        if (clampToX)
+        {
+            targetY = transform.position.y;
+        }
+
+        if (clampToY)
+        {
+            targetX = transform.position.x;
+        }
+        #endregion
+
+        #region Moving In-Game Character
         var pos = transform.position;
         var timeDelta = TimeSinceLastDataFrame();
         pos.x = Mathf.Lerp(pos.x, targetX, timeDelta * movementSmoothing);
@@ -80,9 +119,7 @@ public class WheelChairMovement : SensorDataListener
         transform.position = pos;
 
         timeOfLastDataFrame = Time.time;
-
-        print("User X: " + skeleton.joints[(int)headJoint].position.x);
-        print("User Z: " + skeleton.joints[(int)headJoint].position.z);
+        #endregion
     }
 
     private float TimeSinceLastDataFrame()

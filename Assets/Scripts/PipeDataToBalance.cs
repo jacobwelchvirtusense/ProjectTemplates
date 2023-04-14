@@ -45,8 +45,6 @@ public class PipeDataToBalance : Singleton<PipeDataToBalance>
     /// </summary>
     private void PipingInitialization()
     {
-        print("Initialization");
-
         var args = Environment.GetCommandLineArgs();
         Application.runInBackground = true;
 

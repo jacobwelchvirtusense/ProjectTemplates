@@ -12,7 +12,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static ValidCheck;
-using static GameController;
+using static TimerGameRoutine;
 
 public class UIManager : MonoBehaviour
 {
@@ -123,9 +123,13 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// Sets the timers initial value.
     /// </summary>
-    public static void InitializeTimer()
+    public static void InitializeTimer(int timer = 0)
     {
-        UpdateTimer(GetTimerAmount());
+        if (timer == 0) timer = GetTimerAmount();
+
+        print("Timer: " + timer);
+
+        UpdateTimer(timer);
     }
 
     /// <summary>

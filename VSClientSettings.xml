@@ -53,7 +53,7 @@
 	<plugin>
 		<name>Kinect2</name>
 		<assembly>VSKinect2Plugin.dll</assembly>
-		<type>VSKinect2Plugin.AzureKinectPlugin</type>
+		<type>VSKinect2Plugin.Kinect2Plugin</type>
 		<pre_init_delay>0</pre_init_delay>
 		<configs></configs>
 	</plugin>

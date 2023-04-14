@@ -10,6 +10,7 @@
 *********************************/
 using Assets.SensorAdapters;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using static ValidCheck;
@@ -17,22 +18,51 @@ using static ValidCheck;
 public class SensorFeedback : SensorDataListener
 {
     #region Fields
+    #region Data Visualization
+    [Header("Sensor Data Visualiation")]
+    [Tooltip("The raw image that is use to display sensor data to the user")]
+    [SerializeField] private RawImage sensorDataImage;
+
+    [Tooltip("The color of the actively selected user")]
+    [SerializeField] private Color activeUserColor = Color.green;
+
+    [Tooltip("The color of any user not selected")]
+    [SerializeField] private Color inactiveUserColor = Color.grey;
+
+    [Tooltip("The color of background")]
+    [SerializeField] private Color backgroundColor = Color.black;
+
+    /// <summary>
+    /// The index of the active user being display in the data visualization.
+    /// </summary>
+    private short activeUserIndex = -1;
+
+    /// <summary>
+    /// The texture that is being applied to the sensorDataImage.
+    /// </summary>
+    private Texture2D sensorTexture;
+
+    /// <summary>
+    /// The array of color being applied to the sensorTexture.
+    /// </summary>
+    private Color32[] bodyIndexColors;
+
+    /// <summary>
+    /// The time of the last body indexes frame data.
+    /// </summary>
+    private float timeOfLastBodyIndexData = -Mathf.Infinity;
+
+    /// <summary>
+    /// The minimum time between frame data in the sensor visualization.
+    /// </summary>
+    private const float minTimeBetweenFrames = 0.1f;
+    #endregion
+
+    #region Text Feedback
     /// <summary>
     /// The text object that is used to display feedback to the user.
     /// </summary>
     private TextMeshProUGUI feedbackText;
-
-    /// <summary>
-    /// Holds true if messages from here are allowed to be shown.
-    /// </summary>
-    private bool canShowMessage = true;
-
-    // TODO
-    #region Data Visualization
-    [SerializeField] private RawImage sensorDataImage;
-    private Texture2D sensorTexture;
-    Color32[] bodyIndexColors;
-    #endregion
 
     #region Distance from sensor
     [Header("Distance From Sensor")]
@@ -75,6 +105,7 @@ public class SensorFeedback : SensorDataListener
     [SerializeField] private string noUserFound = "No user detected!!!";
     #endregion
     #endregion
+    #endregion
 
     #region Functions
     /// <summary>
@@ -88,23 +119,42 @@ public class SensorFeedback : SensorDataListener
     }
 
     #region Sensor Data Visualization
+    /// <summary>
+    /// Initializes the sensor data image and its texture.
+    /// </summary>
+    /// <param name="bodyIndexImageSize">The size that the image should be.</param>
     public void InitializeTexture(ImageSize bodyIndexImageSize)
     {
         sensorTexture = new Texture2D(bodyIndexImageSize.Width, bodyIndexImageSize.Height);
 
-        if (sensorDataImage)
-            sensorDataImage.texture = sensorTexture;
+        if (sensorDataImage) sensorDataImage.texture = sensorTexture;
     }
 
-    public void OnNewBodyIndexFrame(object sender, GenericEventArgs<BodyIndexFrame> e)
+    /// <summary>
+    /// The event for new body indexes being recieved.
+    /// </summary>
+    /// <param name="sender">The object sending the message.</param>
+    /// <param name="bodyIndexFrame">The event recieved for the body index frame.</param>
+    public void OnNewBodyIndexFrame(object sender, GenericEventArgs<BodyIndexFrame> bodyIndexFrame)
     {
-        if (e.Args != null) BodyIndexReader_FrameArrived(e);
+        if (!gameObject.activeInHierarchy) return;
+
+        if (bodyIndexFrame.Args != null) BodyIndexReader_FrameArrived(bodyIndexFrame);
     }
 
-    void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
+    /// <summary>
+    /// Sets the sensor data image to show new data.
+    /// </summary>
+    /// <param name="bodyIndexData">The body index data.</param>
+    private void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
     {
+        if (timeOfLastBodyIndexData+minTimeBetweenFrames > Time.time) return;
 
-        var bodyColor = new Color32(0, 255, 0, 255);
+        if (activeUserIndex == -1) return;
+        else
+        {
+            sensorDataImage.color = Color.white;
+        }
 
         if (bodyIndexColors == null || bodyIndexColors.Length != bodyIndexData.Args.PixelCount)
         {
@@ -113,24 +163,27 @@ public class SensorFeedback : SensorDataListener
 
         for (int i = 0; i < bodyIndexColors.Length; i++)
         {
-            byte index = bodyIndexData.Args.Pixels[i];
-
-            if (index != 255)
+            if (bodyIndexData.Args.Pixels[i] == activeUserIndex)
             {
-                bodyIndexColors[i] = new Color32(0, 255, 0, 255); // green; displays most of the time
-
+                bodyIndexColors[i] = activeUserColor;
+            }
+            else if (bodyIndexData.Args.Pixels[i] != 255)
+            {
+                bodyIndexColors[i] = inactiveUserColor;
             }
             else
             {
-                bodyIndexColors[i] = new Color32(32, 32, 32, 50); // black for background
+                bodyIndexColors[i] = backgroundColor;
             }
         }
 
+        timeOfLastBodyIndexData = Time.time;
         sensorTexture.SetPixels32(bodyIndexColors);
         sensorTexture.Apply();
     }
     #endregion
 
+    #region Sensor Text Feedback
     /// <summary>
     /// Sets whether or not the sensor has been found.
     /// </summary>
@@ -157,7 +210,7 @@ public class SensorFeedback : SensorDataListener
     {
         base.SetUserFound(currentUsers);
 
-        if (HasNotFoundUser())
+        if (hasFoundSensor && HasNotFoundUser())
         {
             SetText(noUserFound);
         }
@@ -166,26 +219,14 @@ public class SensorFeedback : SensorDataListener
     /// <summary>
     /// Uses the user body data to display feedback to them on positioning.
     /// </summary>
-    /// <param name="body">The body currently being tracked.</param>
+    /// <param name="skeleton">The skeleton currently being tracked.</param>
     protected override void UseUserData(Skeleton skeleton)
     {
+        if (!gameObject.activeInHierarchy) return;
+
+        activeUserIndex = skeleton.trackingIndex;
+
         DisplayFeedback(skeleton.joints[(int)JointType.SpineBase].position);
-    }
-
-    /// <summary>
-    /// Allows feedback to be shown.
-    /// </summary>
-    public void ResetFeeback()
-    {
-        canShowMessage = true;
-    }
-
-    /// <summary>
-    /// Disables feedback from being displayed.
-    /// </summary>
-    public void DisableFeedback()
-    {
-        canShowMessage = false;
     }
 
     /// <summary>
@@ -222,14 +263,8 @@ public class SensorFeedback : SensorDataListener
     /// <param name="newText">The new feedback to be shown.</param>
     private void SetText(string newText)
     {
-        if (canShowMessage)
-        {
-            feedbackText.text = newText;
-        }
-        else
-        {
-            feedbackText.text = "";
-        }
+        feedbackText.text = newText;
     }
+    #endregion
     #endregion
 }

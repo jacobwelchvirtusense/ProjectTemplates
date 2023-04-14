@@ -1,5 +1,50 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1846723116239267344
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5727878375005655202}
+  - component: {fileID: 173333873873615636}
+  m_Layer: 0
+  m_Name: LivesRoutine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5727878375005655202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1846723116239267344}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5900019085141536508}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &173333873873615636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1846723116239267344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74a0dec73210b9c4bb89744f00dd2569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  numberOfLives: 030000000500000007000000
 --- !u!1 &5900019085141536385
 GameObject:
   m_ObjectHideFlags: 0
@@ -29,7 +74,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3153702548654323822}
+  - {fileID: 5727878375005655202}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -42,7 +89,7 @@ AudioSource:
   m_GameObject: {fileID: 5900019085141536385}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6646245768375773166, guid: 964d3fc2f6326f840809c41b789f56a3, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -141,6 +188,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 465af2d2ad3ec9c469bb961b4888339e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeBeforeEnd: 1
+  timeRoutineStarter: {fileID: 705077611930334608}
+  lifeRoutineStarter: {fileID: 173333873873615636}
+  useLifeRoutine: 0
   StartGameplay:
     m_PersistentCalls:
       m_Calls: []
@@ -149,8 +200,51 @@ MonoBehaviour:
       m_Calls: []
   scoreText: {fileID: 1272027877974569678, guid: b12777d591d485249bbfb8456d3c563f, type: 3}
   comboModifier: 0.25
-  showCountdownToEnd: 1
-  timeBeforeEnd: 1
-  timers: 3c00000078000000b4000000f0000000ffffffff
   endSound: {fileID: 0}
   endSoundVolume: 1
+--- !u!1 &8589346445263584166
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3153702548654323822}
+  - component: {fileID: 705077611930334608}
+  m_Layer: 0
+  m_Name: TimerRoutine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3153702548654323822
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8589346445263584166}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5900019085141536508}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &705077611930334608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8589346445263584166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37706ad5eb3e3249a8edd6c00972302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showCountdownToEnd: 0
+  timers: 1e0000003c00000078000000

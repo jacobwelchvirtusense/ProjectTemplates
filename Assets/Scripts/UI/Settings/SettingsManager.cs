@@ -13,13 +13,17 @@ using System.Linq;
 using System.Numerics;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using static ValidCheck;
 
 public class SettingsManager : UIButtonController
 {
     #region Fields
     #region Saved Data
-    public static int[] indexSettingsData;
+    /// <summary>
+    /// The indexed data for settings.
+    /// </summary>
+    private static int[] indexSettingsData;
 
     /// <summary>
     /// Holds true if the audio should be on.
@@ -30,6 +34,26 @@ public class SettingsManager : UIButtonController
     /// Holds true if the settings panel has not been initialized.
     /// </summary>
     private static bool hasNotInitializedSettings = true;
+
+    /// <summary>
+    /// Is called when the first setting slot is updated.
+    /// </summary>
+    public static UnityEvent<int> Slot1Update = new UnityEvent<int>();
+
+    /// <summary>
+    /// Is called when the second setting slot is updated.
+    /// </summary>
+    public static UnityEvent<int> Slot2Update = new UnityEvent<int>();
+
+    /// <summary>
+    /// Is called when the third setting slot is updated.
+    /// </summary>
+    public static UnityEvent<int> Slot3Update = new UnityEvent<int>();
+
+    /// <summary>
+    /// Is called when the fourth setting slot is updated.
+    /// </summary>
+    public static UnityEvent<int> Slot4Update = new UnityEvent<int>();
     #endregion
 
     /// <summary>
@@ -55,9 +79,6 @@ public class SettingsManager : UIButtonController
     [Range(0, 4)]
     [Tooltip("The initial setting to be used for each setting slot")]
     [SerializeField] private int[] initialSettingSlotsValues = new int[0];
-
-    [Tooltip("The setting slot for timers")]
-    [SerializeField] private IndexedSettingSlot timerSettingSlot;
 
     [Tooltip("The toggle settings slot for muting/unmuting audio")]
     [SerializeField] private IndexedSettingSlot audioToggleSettingSlot;
@@ -163,7 +184,34 @@ public class SettingsManager : UIButtonController
         indexSettingsData[slotIndex]++;
         indexSettingsData[slotIndex] %= slotToBeSet.GetSlotAmount();
 
+        CallUpdateEvent(slotIndex);
+
         RefreshSetting(slotToBeSet, indexSettingsData[slotIndex]);
+    }
+
+    /// <summary>
+    /// Invokes the update event for that setting slots data.
+    /// </summary>
+    /// <param name="slotIndex"></param>
+    private void CallUpdateEvent(int slotIndex)
+    {
+        switch (slotIndex)
+        {
+            case 0:
+                Slot1Update.Invoke(indexSettingsData[slotIndex]);
+                break;
+            case 1:
+                Slot2Update.Invoke(indexSettingsData[slotIndex]);
+                break;
+            case 2:
+                Slot3Update.Invoke(indexSettingsData[slotIndex]);
+                break;
+            case 3:
+                Slot4Update.Invoke(indexSettingsData[slotIndex]);
+                break;
+            default:
+                break;
+        }
     }
 
     /// <summary>
@@ -175,26 +223,7 @@ public class SettingsManager : UIButtonController
     {
         newIndex = Mathf.Clamp(newIndex, 0, slotToBeSet.GetSlotAmount()-1);
 
-        // Initializes the timer
-        if(slotToBeSet == timerSettingSlot)
-        {
-            UIManager.InitializeTimer();
-        }
-
         slotToBeSet.SetCurrentSlotIndex(newIndex);
-    }
-
-    /// <summary>
-    /// Returns the index of timer setting.
-    /// </summary>
-    /// <returns></returns>
-    public static int GetTimerSlot()
-    {
-        if(IsntValid(Instance)) return 0;
-
-        var index = Instance.indexedSettingSlots.IndexOf(Instance.timerSettingSlot);
-
-        return indexSettingsData[index];
     }
 
     #region Audio

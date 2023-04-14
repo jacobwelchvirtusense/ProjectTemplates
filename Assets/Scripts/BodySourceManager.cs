@@ -94,6 +94,8 @@ public class BodySourceManager : MonoBehaviour
     [Tooltip("Holds the number of users to currently track (only 1 supported atm)")]
     [SerializeField] private int numberOfUsersToTrack = 1;
 
+    private ulong activeUserID = 0;
+
     /// <summary>
     /// The array of all body data currently found.
     /// </summary>
@@ -303,7 +305,15 @@ public class BodySourceManager : MonoBehaviour
                 }
             }
 
-            if (centerID != 0) _trackedIds.Add(centerID);
+            if (centerID != 0)
+            {
+                if(activeUserID == 0)
+                {
+                    activeUserID = centerID;
+                }
+
+                _trackedIds.Add(activeUserID);
+            }
             #endregion
 
             #region Create & Refresh Kinect Bodies
