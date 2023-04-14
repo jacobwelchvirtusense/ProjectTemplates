@@ -141,16 +141,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 465af2d2ad3ec9c469bb961b4888339e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreText: {fileID: 1272027877974569678, guid: b12777d591d485249bbfb8456d3c563f, type: 3}
-  comboModifier: 0.25
-  timers: 3c00000078000000b4000000f0000000ffffffff
-  timeBeforeEnd: 1
-  showCountdownToEnd: 1
   StartGameplay:
     m_PersistentCalls:
       m_Calls: []
   EndGameplay:
     m_PersistentCalls:
       m_Calls: []
+  scoreText: {fileID: 1272027877974569678, guid: b12777d591d485249bbfb8456d3c563f, type: 3}
+  comboModifier: 0.25
+  showCountdownToEnd: 1
+  timeBeforeEnd: 1
+  timers: 3c00000078000000b4000000f0000000ffffffff
   endSound: {fileID: 0}
   endSoundVolume: 1

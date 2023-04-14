@@ -15,6 +15,7 @@ using static ValidCheck;
 using Assets.AzureKinect;
 using Assets.Kinect;
 using Assets.SensorAdapters;
+using System.Linq;
 
 public class BodySourceManager : MonoBehaviour 
 {
@@ -41,6 +42,19 @@ public class BodySourceManager : MonoBehaviour
 
             return Instance.pluginSettings.SensorType;
         } 
+    }
+
+    /// <summary>
+    /// Returns true if the user is using an azure kinnect sensor.
+    /// </summary>
+    public static bool IsAzureKinnect
+    {
+        get
+        {
+            if (Instance == null || Instance.pluginSettings == null) return false;
+
+            return Instance.pluginSettings.SensorType == SensorType.AZUREKINNECT;
+        }
     }
 
     /// <summary>
@@ -85,7 +99,6 @@ public class BodySourceManager : MonoBehaviour
     /// </summary>
     private List<Skeleton> skeletonData = null;
     #endregion
-
 
     #region Functions
     #region Initialization
@@ -164,7 +177,14 @@ public class BodySourceManager : MonoBehaviour
     /// </summary>
     private void InitializeSensorEventListeners()
     {
-        kinnectSensor.skeletonFrameReady += OnSkeletonFrameReady;
+        if (IsAzureKinnect)
+        {
+            StartCoroutine(AzureKinectFrameUpdate());
+        }
+        else
+        {
+            kinnectSensor.skeletonFrameReady += OnSkeletonFrameReady;
+        }
 
         // Initializes the sensor feedback listener
         var sensorFeedbackHandler = FindObjectOfType<SensorFeedback>();
@@ -177,7 +197,8 @@ public class BodySourceManager : MonoBehaviour
     #endregion
     #endregion
 
-    #region Event Updates
+    #region Frame Reading
+    #region Kinect2 Frame Reading
     /// <summary>
     /// Handles the event of new skeleton data being recieved.
     /// </summary>
@@ -189,7 +210,67 @@ public class BodySourceManager : MonoBehaviour
 
         TrackUsers();
     }
+    #endregion
 
+    #region Azure Kinect Frame Reading
+    /// <summary>
+    /// A routine for reading frames and calling tracking updates for the sensor.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator AzureKinectFrameUpdate()
+    {
+        while (true)
+        {
+            yield return new WaitForEndOfFrame();
+            CheckForFrame();
+        }
+    }
+
+    /// <summary>
+    /// Checks for frame updates from the user.
+    /// </summary>
+    private void CheckForFrame()
+    {
+        if (kinnectSensor == null) return;
+
+        if (kinnectSensor.ShouldPollForFrames) kinnectSensor.PollForFrames();
+
+        var data = kinnectSensor.GetData();
+
+        if (data != null)
+        {
+            var listData = data.ToList();
+
+            if (IsNewFrame(skeletonData, listData))
+            {
+                skeletonData = listData;
+                TrackUsers();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if the new frame is actually different from the previous frame. This is to ensure new
+    /// calls for tracking users is valid.
+    /// </summary>
+    /// <param name="lastFrameData">The data of the previous valid frame.</param>
+    /// <param name="newFrameData">The data of the new frame.</param>
+    /// <returns></returns>
+    private bool IsNewFrame(List<Skeleton> lastFrameData, List<Skeleton> newFrameData)
+    {
+        if (lastFrameData == null || lastFrameData.Count != newFrameData.Count) return true;
+
+        for (int i = 0; i < lastFrameData.Count; i++)
+        {
+            if (lastFrameData[i] != newFrameData[i]) return true;
+        }
+
+        return false;
+    }
+    #endregion
+    #endregion
+
+    #region Event Updates
     #region Frame Updates
     /// <summary>
     /// Tracks users and sends out their body data to all listening scripts.

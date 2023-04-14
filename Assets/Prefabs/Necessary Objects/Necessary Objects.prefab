@@ -327,6 +327,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1166525850526460398}
+    - target: {fileID: 955049898870488219, guid: 7de9b75f1ffb2f84d97e721a06cf1192, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: QuitGameEarly
+      objectReference: {fileID: 0}
     - target: {fileID: 1307312443578597221, guid: 7de9b75f1ffb2f84d97e721a06cf1192, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -791,6 +795,10 @@ PrefabInstance:
       propertyPath: ClickEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1166525850526460398}
+    - target: {fileID: 7991289742843248357, guid: 7de9b75f1ffb2f84d97e721a06cf1192, type: 3}
+      propertyPath: ClickEvent.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: QuitGameEarly
+      objectReference: {fileID: 0}
     - target: {fileID: 8716354504419731916, guid: 7de9b75f1ffb2f84d97e721a06cf1192, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

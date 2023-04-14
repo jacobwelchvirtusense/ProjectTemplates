@@ -19,6 +19,7 @@ using static SettingsManager;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using System.Threading.Tasks;
+using Assets.Scripts;
 
 [RequireComponent(typeof(AudioSource))]
 public class GameController : MonoBehaviour
@@ -187,14 +188,6 @@ public class GameController : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
     }
-
-    /// <summary>
-    /// Starts the countdown for the game to begin.
-    /// </summary>
-    public void StartGameCountdown()
-    {
-        StartCoroutine(CountdownLoop());
-    }
     #endregion
 
     #region Testing Editor Keys
@@ -295,6 +288,14 @@ public class GameController : MonoBehaviour
     #endregion
 
     #region Countdown
+    /// <summary>
+    /// Starts the countdown for the game to begin.
+    /// </summary>
+    public void StartGameCountdown()
+    {
+        StartCoroutine(CountdownLoop());
+    }
+
     /// <summary>
     /// Counts down before starting the game again.
     /// </summary>
@@ -433,9 +434,14 @@ public class GameController : MonoBehaviour
     /// </summary>
     private void OutputData()
     {
-        // TODO
-        // currentPointTotal;
-        // highestComboReached
+        // TODO Add all of the data to be sent
+        PipeDataToBalance.SendEndGameData();
+    }
+
+    public void QuitGameEarly()
+    {
+        PipeDataToBalance.SendSkippedXml();
+        ExitGame();
     }
 
     /// <summary>
@@ -460,6 +466,7 @@ public class GameController : MonoBehaviour
     {
         BodySourceManager.CloseSensor();
 
+        if(BodySourceManager.IsAzureKinnect)
         await Task.Delay(1000); // Waits 1 second to ensure that the sensor gets uninitialized
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

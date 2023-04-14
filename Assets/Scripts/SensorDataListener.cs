@@ -78,7 +78,7 @@ public abstract class SensorDataListener : MonoBehaviour
     /// <summary>
     /// Calls for user data to be used.
     /// </summary>
-    /// <param name="body">The body of the user being tracked.</param>
+    /// <param name="skeleton">The Skeleton of the user being tracked.</param>
     private void SetUserData(Skeleton skeleton)
     {
         if (hasFoundSensor && HasFoundUser())
@@ -90,7 +90,7 @@ public abstract class SensorDataListener : MonoBehaviour
     /// <summary>
     /// Uses the users data for some action or feedback.
     /// </summary>
-    /// <param name="body">The body of the user being tracked.</param>
+    /// <param name="skeleton">The Skeleton of the user being tracked.</param>
     protected abstract void UseUserData(Skeleton skeleton);
     #endregion
 
