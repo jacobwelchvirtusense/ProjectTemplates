@@ -40,6 +40,8 @@ public class PausemenuController : MonoBehaviour
             pauseMenu.SetActive(!pauseMenu.activeSelf);
             Time.timeScale = pauseMenu.activeSelf ? 0.0f : 1.0f;
 
+            AudioListener.pause = pauseMenu.activeSelf;
+
             TutorialVideoHandler.PauseVideo(pauseMenu.activeSelf);
         }
     }

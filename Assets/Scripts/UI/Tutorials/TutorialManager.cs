@@ -208,7 +208,10 @@ public class TutorialManager : MonoBehaviour
         #region Before Audio
         if (tutorial.DelayBefore != 0) yield return new WaitForSeconds(tutorial.DelayBefore); // Even if 0, calling a WaitForSeconds will run for at least 1 frame so we check first
 
-        if (tutorial.PreTutorialEvent != TutorialElement.PreTutorialAction.NONE) yield return PreTutorialAction(tutorial.PreTutorialEvent);
+        foreach (var preEvent in tutorial.PreTutorialEvent)
+        {
+            if (preEvent != TutorialElement.PreTutorialAction.NONE) yield return PreTutorialAction(preEvent);
+        }
 
         videoHandler.SetVideo(tutorial.VideoClip);
         #endregion
@@ -216,7 +219,10 @@ public class TutorialManager : MonoBehaviour
         yield return DialoguePlayer(tutorial.SubtitleText, tutorial.AudioDialogue, tutorial.DialogueVolume);
 
         #region After Audio
-        if (tutorial.PostTutorialEvent != TutorialElement.PostTutorialAction.NONE) yield return PostTutorialAction(tutorial.PostTutorialEvent);
+        foreach (var postEvent in tutorial.PostTutorialEvent)
+        {
+            if (postEvent != TutorialElement.PostTutorialAction.NONE) yield return PostTutorialAction(postEvent);
+        }
 
         if (tutorial.DelayAfter != 0) yield return new WaitForSeconds(tutorial.DelayAfter); // Even if 0, calling a WaitForSeconds will run for at least 1 frame so we check first
         #endregion

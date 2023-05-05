@@ -106,11 +106,11 @@ public class LiveGameRoutine : IGameRoutine
         {
             UIManager.InitializeTimer(-1);
 
-            SettingsManager.Slot1Update.AddListener(UpdateToNewLifeSlot);
+            SettingsManager.Slot1OnValueChanged.AddListener(UpdateToNewLifeSlot);
         }
         else
         {
-            SettingsManager.Slot1Update.RemoveListener(UpdateToNewLifeSlot);
+            SettingsManager.Slot1OnValueChanged.RemoveListener(UpdateToNewLifeSlot);
         }
     }
     #endregion

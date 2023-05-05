@@ -35,25 +35,81 @@ public class SettingsManager : UIButtonController
     /// </summary>
     private static bool hasNotInitializedSettings = true;
 
+    #region Slot Data Accessors
+    /// <summary>
+    /// The index of settings slot 1.
+    /// </summary>
+    public static int Slot1
+    {
+        get
+        {
+            if (indexSettingsData.Length < 1) return 0;
+
+            return indexSettingsData[0];
+        }
+    }
+
+    /// <summary>
+    /// The index of settings slot 2.
+    /// </summary>
+    public static int Slot2
+    {
+        get
+        {
+            if (indexSettingsData.Length < 2) return 0;
+
+            return indexSettingsData[1];
+        }
+    }
+
+    /// <summary>
+    /// The index of settings slot 3.
+    /// </summary>
+    public static int Slot3
+    {
+        get
+        {
+            if (indexSettingsData.Length < 3) return 0;
+
+            return indexSettingsData[2];
+        }
+    }
+
+    /// <summary>
+    /// The index of settings slot 4.
+    /// </summary>
+    public static int Slot4
+    {
+        get
+        {
+            if (indexSettingsData.Length < 4) return 0;
+
+            return indexSettingsData[3];
+        }
+    }
+    #endregion
+
+    #region Slot Changed Events
     /// <summary>
     /// Is called when the first setting slot is updated.
     /// </summary>
-    public static UnityEvent<int> Slot1Update = new UnityEvent<int>();
+    public static UnityEvent<int> Slot1OnValueChanged = new UnityEvent<int>();
 
     /// <summary>
     /// Is called when the second setting slot is updated.
     /// </summary>
-    public static UnityEvent<int> Slot2Update = new UnityEvent<int>();
+    public static UnityEvent<int> Slot2OnValueChanged = new UnityEvent<int>();
 
     /// <summary>
     /// Is called when the third setting slot is updated.
     /// </summary>
-    public static UnityEvent<int> Slot3Update = new UnityEvent<int>();
+    public static UnityEvent<int> Slot3OnValueChanged = new UnityEvent<int>();
 
     /// <summary>
     /// Is called when the fourth setting slot is updated.
     /// </summary>
-    public static UnityEvent<int> Slot4Update = new UnityEvent<int>();
+    public static UnityEvent<int> Slot4OnValueChanged = new UnityEvent<int>();
+    #endregion
     #endregion
 
     /// <summary>
@@ -98,8 +154,8 @@ public class SettingsManager : UIButtonController
 
         indexedSettingSlots = GetComponentsInChildren<IndexedSettingSlot>().ToList();
 
-        if(IsntValid(indexSettingsData))
-        indexSettingsData = new int[indexedSettingSlots.Count];
+        if (IsntValid(indexSettingsData))
+            indexSettingsData = new int[indexedSettingSlots.Count];
     }
 
     /// <summary>
@@ -107,6 +163,8 @@ public class SettingsManager : UIButtonController
     /// </summary>
     private void Start()
     {
+        UpdateSelectedButton(1);
+
         InitializeSettings();
     }
 
@@ -115,11 +173,13 @@ public class SettingsManager : UIButtonController
     /// </summary>
     private void InitializeSettings()
     {
-        for(int i = 0; i < initialSettingSlotsValues.Length; i++)
+        for (int i = 0; i < initialSettingSlotsValues.Length; i++)
         {
             if (hasNotInitializedSettings)
             {
                 indexSettingsData[i] = initialSettingSlotsValues[i];
+
+                CallUpdateEvent(i);
             }
 
             RefreshSetting(indexedSettingSlots[i], indexSettingsData[i]);
@@ -145,9 +205,9 @@ public class SettingsManager : UIButtonController
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    public override void UpdateSelectedButton(int mod)
+    public override void UpdateSelectedButton(int mod, bool shouldPlaySound = true)
     {
-        base.UpdateSelectedButton(mod);
+        base.UpdateSelectedButton(mod, shouldPlaySound);
 
         settingsSlots[currentSettingsSlot].SetHover(false);
         currentSettingsSlot = (currentSettingsSlot + mod) % settingsSlots.Length;
@@ -158,6 +218,8 @@ public class SettingsManager : UIButtonController
         }
 
         settingsSlots[currentSettingsSlot].SetHover(true);
+
+        if (!settingsSlots[currentSettingsSlot].CanHoverSlot && mod != 0) UpdateSelectedButton(mod, false);
     }
 
     /// <summary>
@@ -168,7 +230,6 @@ public class SettingsManager : UIButtonController
         base.ClickSlot();
 
         settingsSlots[currentSettingsSlot].ClickEvent.Invoke();
-
     }
     #endregion
 
@@ -198,16 +259,16 @@ public class SettingsManager : UIButtonController
         switch (slotIndex)
         {
             case 0:
-                Slot1Update.Invoke(indexSettingsData[slotIndex]);
+                Slot1OnValueChanged.Invoke(indexSettingsData[slotIndex]);
                 break;
             case 1:
-                Slot2Update.Invoke(indexSettingsData[slotIndex]);
+                Slot2OnValueChanged.Invoke(indexSettingsData[slotIndex]);
                 break;
             case 2:
-                Slot3Update.Invoke(indexSettingsData[slotIndex]);
+                Slot3OnValueChanged.Invoke(indexSettingsData[slotIndex]);
                 break;
             case 3:
-                Slot4Update.Invoke(indexSettingsData[slotIndex]);
+                Slot4OnValueChanged.Invoke(indexSettingsData[slotIndex]);
                 break;
             default:
                 break;
@@ -221,7 +282,7 @@ public class SettingsManager : UIButtonController
     /// <param name="newIndex">The new setting index to set it to.</param>
     private void RefreshSetting(IndexedSettingSlot slotToBeSet, int newIndex)
     {
-        newIndex = Mathf.Clamp(newIndex, 0, slotToBeSet.GetSlotAmount()-1);
+        newIndex = Mathf.Clamp(newIndex, 0, slotToBeSet.GetSlotAmount() - 1);
 
         slotToBeSet.SetCurrentSlotIndex(newIndex);
     }

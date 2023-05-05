@@ -36,9 +36,9 @@ public class BasicButtonController : UIButtonController
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    public override void UpdateSelectedButton(int mod)
+    public override void UpdateSelectedButton(int mod, bool shouldPlaySound = true)
     {
-        base.UpdateSelectedButton(mod);
+        base.UpdateSelectedButton(mod, shouldPlaySound);
 
         currentButtonSlot = (currentButtonSlot + mod) % buttons.Length;
 

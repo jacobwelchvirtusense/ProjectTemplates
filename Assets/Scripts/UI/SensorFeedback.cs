@@ -9,6 +9,7 @@
  *              within the space of the sensor.
 *********************************/
 using Assets.SensorAdapters;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -46,16 +47,6 @@ public class SensorFeedback : SensorDataListener
     /// The array of color being applied to the sensorTexture.
     /// </summary>
     private Color32[] bodyIndexColors;
-
-    /// <summary>
-    /// The time of the last body indexes frame data.
-    /// </summary>
-    private float timeOfLastBodyIndexData = -Mathf.Infinity;
-
-    /// <summary>
-    /// The minimum time between frame data in the sensor visualization.
-    /// </summary>
-    private const float minTimeBetweenFrames = 0.1f;
     #endregion
 
     #region Text Feedback
@@ -146,10 +137,8 @@ public class SensorFeedback : SensorDataListener
     /// Sets the sensor data image to show new data.
     /// </summary>
     /// <param name="bodyIndexData">The body index data.</param>
-    private void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
+    private async void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
     {
-        if (timeOfLastBodyIndexData+minTimeBetweenFrames > Time.time) return;
-
         if (activeUserIndex == -1) return;
         else
         {
@@ -161,25 +150,40 @@ public class SensorFeedback : SensorDataListener
             bodyIndexColors = new Color32[bodyIndexData.Args.PixelCount];
         }
 
-        for (int i = 0; i < bodyIndexColors.Length; i++)
-        {
-            if (bodyIndexData.Args.Pixels[i] == activeUserIndex)
-            {
-                bodyIndexColors[i] = activeUserColor;
-            }
-            else if (bodyIndexData.Args.Pixels[i] != 255)
-            {
-                bodyIndexColors[i] = inactiveUserColor;
-            }
-            else
-            {
-                bodyIndexColors[i] = backgroundColor;
-            }
-        }
+        await DataVisualizationTask(bodyIndexData);
 
-        timeOfLastBodyIndexData = Time.time;
-        sensorTexture.SetPixels32(bodyIndexColors);
-        sensorTexture.Apply();
+        if(bodyIndexColors != null && sensorTexture != null)
+        {
+            sensorTexture.SetPixels32(bodyIndexColors);
+            sensorTexture.Apply();
+        }
+    }
+
+    /// <summary>
+    /// Putting this into a task helps it run without affect performance.
+    /// </summary>
+    /// <param name="bodyIndexData">The body index data to be used.</param>
+    /// <returns></returns>
+    private Task DataVisualizationTask(GenericEventArgs<BodyIndexFrame> bodyIndexData)
+    {
+        return Task.Run(() =>
+        {
+            for (int i = 0; i < bodyIndexColors.Length; i++)
+            {
+                if (bodyIndexData.Args.Pixels[i] == activeUserIndex)
+                {
+                    bodyIndexColors[i] = activeUserColor;
+                }
+                else if (bodyIndexData.Args.Pixels[i] != 255)
+                {
+                    bodyIndexColors[i] = inactiveUserColor;
+                }
+                else
+                {
+                    bodyIndexColors[i] = backgroundColor;
+                }
+            }
+        });
     }
     #endregion
 

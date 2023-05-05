@@ -79,7 +79,7 @@ public class TutorialElement
     public enum PreTutorialAction { NONE }
 
     [field: Tooltip("The interruption type for the tutorial")]
-    [field: SerializeField] public PreTutorialAction PreTutorialEvent { get; private set; }
+    [field: SerializeField] public PreTutorialAction[] PreTutorialEvent { get; private set; }
     #endregion
 
     #region Post Tutorial Action
@@ -89,7 +89,7 @@ public class TutorialElement
     public enum PostTutorialAction { NONE }
 
     [field: Tooltip("The interruption type for the tutorial")]
-    [field: SerializeField] public PostTutorialAction PostTutorialEvent { get; private set; }
+    [field: SerializeField] public PostTutorialAction[] PostTutorialEvent { get; private set; }
     #endregion
     #endregion
 }

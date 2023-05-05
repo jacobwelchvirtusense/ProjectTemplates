@@ -9,9 +9,10 @@
  *              the music that is currently being played.
 *********************************/
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
-public class MusicController : MonoBehaviour
+public class MusicController : Singleton<MusicController>
 {
     #region Fields
     /// <summary>
@@ -23,25 +24,26 @@ public class MusicController : MonoBehaviour
     /// The audiosource of the 
     /// </summary>
     private AudioSource audioSource;
-
-    /// <summary>
-    /// The scene instance of the Music Controller.
-    /// </summary>
-    private static MusicController Instance;
     #endregion
 
     #region Functions
     /// <summary>
     /// Initializes components and fields.
     /// </summary>
-    private void Awake()
+    protected override void Awake()
     {
-        Instance = this; 
-        audioSource = GetComponent<AudioSource>();
+        base.Awake();
 
-        if(audioSource != null)
+        if (this != null)
         {
-            startingVolume = audioSource.volume;
+            audioSource = GetComponent<AudioSource>();
+
+            if (audioSource != null)
+            {
+                startingVolume = audioSource.volume;
+            }
+
+            SceneManager.activeSceneChanged += ResetVolume;
         }
     }
 
@@ -54,6 +56,16 @@ public class MusicController : MonoBehaviour
         if (Instance == null) return;
 
         Instance.MusicVolumeUpdater(newVolumeScale);
+    }
+
+    /// <summary>
+    /// Resets the musics volume when a new scene is entered.
+    /// </summary>
+    /// <param name="currentScene">The currently active scene before the change.</param>
+    /// <param name="nextScene">The next scene that is being loaded.</param>
+    private void ResetVolume(Scene currentScene, Scene nextScene)
+    {
+        audioSource.volume = startingVolume;
     }
 
     /// <summary>
@@ -73,9 +85,9 @@ public class MusicController : MonoBehaviour
     /// <param name="newVolumeScale">The percentage of its starting volume to set to.</param>
     private void MusicVolumeUpdater(float newVolumeScale)
     {
-        if(audioSource == null) return;
+        if (audioSource == null) return;
 
-        audioSource.volume = newVolumeScale*startingVolume;
+        audioSource.volume = newVolumeScale * startingVolume;
     }
     #endregion
 }

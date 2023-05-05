@@ -32,6 +32,12 @@ public class CustomRandom : MonoBehaviour
         return (Random.Range(0, 2) * 2 - 1);
     }
 
+    public static Quaternion RandomRotation()
+    {
+        return Quaternion.Euler(new Vector3(0, 0, RandomGeneration(-180, 180)));
+    }
+
+
     #region Random Min Max
     /// <summary>
     /// Generates a random value between the min and max given a specific generation method.

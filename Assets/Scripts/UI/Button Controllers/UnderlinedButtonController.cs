@@ -38,11 +38,11 @@ public class UnderlinedButtonController : BasicButtonController
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    public override void UpdateSelectedButton(int mod)
+    public override void UpdateSelectedButton(int mod, bool shouldPlaySound = true)
     {
         var previousButtonSlot = currentButtonSlot;
 
-        base.UpdateSelectedButton(mod);
+        base.UpdateSelectedButton(mod, shouldPlaySound);
 
         if (currentButtonSlot < 0 || buttonTexts.Count <= previousButtonSlot || buttonTexts.Count <= currentButtonSlot) return;
 

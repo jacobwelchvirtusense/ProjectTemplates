@@ -7,6 +7,7 @@
  * 
  * Description: Handles the functionality for a single setting slot.
 *********************************/
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -32,6 +33,51 @@ public class SettingsSlot : MonoBehaviour
     /// An event that is called when even this slot is clicked.
     /// </summary>
     public UnityEvent ClickEvent = new UnityEvent();
+
+    [Tooltip("The color for when this slot is disabled")]
+    [SerializeField] private Color disabledColor;
+
+    [Tooltip("Hold true if this slot can be clicked by default")]
+    [SerializeField] private bool canClickSlot = true;
+
+    /// <summary>
+    /// Holds true if this slot is currently able to be clicked on.
+    /// </summary>
+    public bool CanClickSlot
+    {
+        get
+        {
+            return canClickSlot;
+        }
+
+        set
+        {
+            canClickSlot = value;
+
+            CheckInteractableState();
+        }
+    }
+
+    [Tooltip("Hold true if this slot can be hovered over by default")]
+    [SerializeField] private bool canHoverSlot = true;
+
+    /// <summary>
+    /// Holds true if this slot is currently able to be hovered over.
+    /// </summary>
+    public bool CanHoverSlot
+    {
+        get
+        {
+            return canHoverSlot;
+        }
+
+        set
+        {
+            canHoverSlot = value;
+
+            CheckInteractableState();
+        }
+    }
     #endregion
 
     #region Functions
@@ -42,6 +88,46 @@ public class SettingsSlot : MonoBehaviour
     {
         slotImage = GetComponent<Image>();
         startingSprite = slotImage.sprite;
+
+        if (!canHoverSlot)
+        {
+            CheckInteractableState();
+
+            FindObjectOfType<BodySourceManager>().SensorFoundEvent.AddListener(UpdateHoverability);
+        }
+    }
+
+    private void UpdateHoverability(bool sensorFound)
+    {
+        CanHoverSlot = sensorFound;
+    }
+
+    /// <summary>
+    ///  Checks and sets the visual for its interactable state.
+    /// </summary>
+    private void CheckInteractableState()
+    {
+        if (!canClickSlot || !canHoverSlot)
+        {
+            SetImageAndTextColors(disabledColor);
+        }
+        else
+        {
+            SetImageAndTextColors(Color.white);
+        }
+    }
+
+    private void SetImageAndTextColors(Color newColor)
+    {
+        foreach (var image in slotImage.GetComponentsInChildren<Image>())
+        {
+            image.color = newColor;
+        }
+
+        foreach (var text in slotImage.GetComponentsInChildren<TextMeshProUGUI>())
+        {
+            text.color = newColor;
+        }
     }
 
     /// <summary>

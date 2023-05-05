@@ -21,22 +21,28 @@ public class WheelChairMovement : SensorDataListener
 {
     #region Fields
     [Header("Sensor Parameters")]
+    [Range(0.0f, 3.0f)]
     [Tooltip("The x position the user can be relative to the sensor")]
     [SerializeField] private float maxUserXPos = 5.0f;
 
+    [Range(0.0f, 6.0f)]
     [Tooltip("The minimum z position the user can be relative to the sensor")]
     [SerializeField] private float minUserZPos = 0.5f;
 
+    [Range(0.0f, 6.0f)]
     [Tooltip("The maximum z position the user can be relative to the sensor")]
     [SerializeField] private float maxUserZPos = 5.0f;
 
     [Header("In-Game Character Parameters")]
+    [Range(0.0f, 15.0f)]
     [Tooltip("The maximum x position the in-game character will be based on user XPos")]
     [SerializeField] private float maxCharacterXPos = 10.0f;
 
+    [Range(0.0f, 15.0f)]
     [Tooltip("The maximum Y position the in-game character will be based on user ZPos")]
     [SerializeField] private float maxCharacterYPos = 8.0f;
 
+    [Range(0.0f, 200.0f)]
     [Tooltip("The amount of smoothing to be applied to the movement to reduce jittering")]
     [SerializeField] private float movementSmoothing = 10;
 

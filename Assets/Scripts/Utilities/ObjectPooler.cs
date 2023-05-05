@@ -8,6 +8,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 
 public class ObjectPooler : Singleton<ObjectPooler>
 {
@@ -30,7 +32,28 @@ public class ObjectPooler : Singleton<ObjectPooler>
     {
         base.Awake();
 
+        SceneManager.activeSceneChanged += DisableAllPoolObjects;
+
         SpawnInitialObjectPools();
+    }
+
+    /// <summary>
+    /// Disables all objects in all pools everytime the scene changes.
+    /// </summary>
+    /// <param name="currentScene">The current scene in use.</param>
+    /// <param name="nextScene">The scene that is being changed to.</param>
+    private void DisableAllPoolObjects(Scene currentScene, Scene nextScene)
+    {
+        foreach (var pool in pools)
+        {
+            if (poolDictionary.TryGetValue(pool.Prefab.name, out Queue<GameObject> poolObjects))
+            {
+                foreach (var obj in poolObjects)
+                {
+                    obj.SetActive(false);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -52,13 +75,13 @@ public class ObjectPooler : Singleton<ObjectPooler>
     {
         if (CheckIfInstanceDoesntExists()) return;
 
-        if(newPool == null)
+        if (newPool == null)
         {
             Debug.Log("The given pool is null; it will not be spawned");
             return;
         }
 
-        if(newPool.Prefab == null)
+        if (newPool.Prefab == null)
         {
             Debug.Log("The given pool has a null prefab; it will not be spawned");
             return;
@@ -74,6 +97,7 @@ public class ObjectPooler : Singleton<ObjectPooler>
             {
                 GameObject obj = Instantiate(newPool.Prefab, Instance.transform);
                 obj.SetActive(false);
+                obj.name = obj.name.Remove(obj.name.Length - 7);
                 objectPool.Enqueue(obj);
             }
 
@@ -120,19 +144,30 @@ public class ObjectPooler : Singleton<ObjectPooler>
     /// </summary>
     /// <param name="prefabName">The name of the prefab to be returned to the pool</param>
     /// <param name="objectToReturn">The object to return to the pool.</param>
-    public static void ReturnObjectToPool(string prefabName, GameObject objectToReturn)
+    public static async void ReturnObjectToPool(string prefabName, GameObject objectToReturn)
     {
         if (CheckIfInstanceDoesntExists()) return;
 
-        objectToReturn.SetActive(false);
-        objectToReturn.transform.parent = Instance.transform;
+        await ResetPool(prefabName, objectToReturn);
+    }
 
-        // Resets the pool so only one instance of this object is in it and enqueues it
-        var queue = Instance.poolDictionary[prefabName];
-        queue = new Queue<GameObject>(queue.Where(x => x != objectToReturn));
-        Instance.poolDictionary[prefabName] = queue;
-        Instance.poolDictionary[prefabName].Enqueue(objectToReturn);
+    private static Task ResetPool(string prefabName, GameObject objectToReturn)
+    {
+        return Task.Run(() =>
+        {
+            objectToReturn.SetActive(false);
+            objectToReturn.transform.parent = Instance.transform;
 
+            // Resets the pool so only one instance of this object is in it and enqueues it
+            var queueList = Instance.poolDictionary[prefabName].ToList();
+            queueList.Remove(objectToReturn);
+
+            var newQueue = new Queue<GameObject>();
+            newQueue.Enqueue(objectToReturn);
+            queueList.ForEach(o => newQueue.Enqueue(o));
+
+            Instance.poolDictionary[prefabName] = newQueue;
+        });
     }
 
     /// <summary>

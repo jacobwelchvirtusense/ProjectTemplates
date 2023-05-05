@@ -105,11 +105,11 @@ public class TimerGameRoutine : IGameRoutine
         {
             UIManager.InitializeTimer();
 
-            SettingsManager.Slot1Update.AddListener(UpdateToNewTimerSlot);
+            SettingsManager.Slot1OnValueChanged.AddListener(UpdateToNewTimerSlot);
         }
         else
         {
-            SettingsManager.Slot1Update.RemoveListener(UpdateToNewTimerSlot);
+            SettingsManager.Slot1OnValueChanged.RemoveListener(UpdateToNewTimerSlot);
         }
     }
     #endregion

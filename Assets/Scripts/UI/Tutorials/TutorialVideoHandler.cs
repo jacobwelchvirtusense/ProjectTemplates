@@ -53,8 +53,7 @@ public class TutorialVideoHandler : MonoBehaviour
     /// <param name="shouldPause">Holds true if the video should be paused.</param>
     public static void PauseVideo(bool shouldPause)
     {
-
-        if (IsntValid(Instance) || IsntValid(Instance.videoPlayer)) return;
+        if (IsntValid(Instance) || Instance.videoPlayer == null) return;
 
         if (shouldPause)
         {

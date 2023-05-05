@@ -17,7 +17,7 @@ using Assets.Kinect;
 using Assets.SensorAdapters;
 using System.Linq;
 
-public class BodySourceManager : MonoBehaviour 
+public class BodySourceManager : MonoBehaviour
 {
     #region Fields
     /// <summary>
@@ -34,14 +34,14 @@ public class BodySourceManager : MonoBehaviour
     /// <summary>
     /// Returns the type of sensor currently being used.
     /// </summary>
-    public static SensorType CurrentSensorUsed 
-    { 
+    public static SensorType CurrentSensorUsed
+    {
         get
         {
             if (Instance == null || Instance.pluginSettings == null) return SensorType.KINNECTV2;
 
             return Instance.pluginSettings.SensorType;
-        } 
+        }
     }
 
     /// <summary>
@@ -90,11 +90,127 @@ public class BodySourceManager : MonoBehaviour
     private int numberOfUsersFound = -1;
     #endregion
 
-    [Range(1f, 1f)]
-    [Tooltip("Holds the number of users to currently track (only 1 supported atm)")]
-    [SerializeField] private int numberOfUsersToTrack = 1;
+    /// <summary>
+    /// The skeleton of the first active user.
+    /// </summary>
+    private Skeleton activeUser1 = null;
 
-    private ulong activeUserID = 0;
+    public Skeleton Player1Skeleton
+    {
+        get
+        {
+            return activeUser1;
+        }
+    }
+
+    /// <summary>
+    /// The skeleton of the second active user.
+    /// </summary>
+    private Skeleton activeUser2 = null;
+
+    public Skeleton Player2Skeleton
+    {
+        get
+        {
+            return activeUser2;
+        }
+    }
+
+    public static int NumberOfUsersToTrack
+    {
+        get
+        {
+            switch (SettingsManager.Slot1)
+            {
+                case 0:
+                    return 1;
+                default:
+                    return 2;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Holds true if the given ID is an active user.
+    /// </summary>
+    /// <param name="id">The id of skeleton to be checked.</param>
+    /// <returns></returns>
+    public static bool IsActiveID(ulong id)
+    {
+        if (IsntValid(Instance)) return false;
+
+        if (NumberOfUsersToTrack == 1)
+        {
+            return Instance.activeUser1 != null && id == Instance.activeUser1.trackingId;
+        }
+        else
+        {
+            return (Instance.activeUser1 != null && id == Instance.activeUser1.trackingId) || (Instance.activeUser2 != null && id == Instance.activeUser2.trackingId);
+        }
+    }
+
+    /// <summary>
+    /// Holds true if the given index is an active user.
+    /// </summary>
+    /// <param name="index">The index of the skeleton to be checked.</param>
+    /// <returns></returns>
+    public static bool IsActiveIndex(short index)
+    {
+        if (IsntValid(Instance)) return false;
+
+        if (NumberOfUsersToTrack == 1)
+        {
+            if (Instance.activeUser1 == null) return false;
+
+            return index == Instance.activeUser1.trackingIndex;
+        }
+        else
+        {
+            return (Instance.activeUser1 != null && index == Instance.activeUser1.trackingIndex) || (Instance.activeUser2 != null && index == Instance.activeUser2.trackingIndex);
+        }
+    }
+
+    public static bool ActiveIndexPlayerOne(short index)
+    {
+        if (IsntValid(Instance)) return false;
+
+        if (NumberOfUsersToTrack == 1)
+        {
+            if (Instance.activeUser1 == null) return false;
+
+            return index == Instance.activeUser1.trackingIndex;
+        }
+        else
+        {
+            return (Instance.activeUser1 != null && index == Instance.activeUser1.trackingIndex);
+        }
+    }
+
+    public static bool ActiveIndexPlayerTwo(short index)
+    {
+        if (IsntValid(Instance)) return false;
+
+        if (NumberOfUsersToTrack == 1)
+        {
+            if (Instance.activeUser2 == null) return false;
+
+            return index == Instance.activeUser2.trackingIndex;
+        }
+        else
+        {
+            return (Instance.activeUser2 != null && index == Instance.activeUser2.trackingIndex);
+        }
+    }
+
+    /// <summary>
+    /// Holds true if the given ID is player one.
+    /// </summary>
+    /// <param name="id">The id of the skeleton to be checked.</param>
+    /// <returns></returns>
+    public static bool IsPlayerOne(ulong id)
+    {
+        return id == Instance.activeUser1.trackingId;
+    }
 
     /// <summary>
     /// The array of all body data currently found.
@@ -110,17 +226,29 @@ public class BodySourceManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+
+        SettingsManager.Slot1OnValueChanged.AddListener(UpdateNumberOfUsers);
     }
 
     /// <summary>
     /// Initializes the kinnect sensor and its body reader.
     /// </summary>
-    private void Start() 
+    private void Start()
     {
         ChangeSensorFound(false);
         ChangeUsersFound(0);
 
         StartCoroutine(CheckForSensor());
+    }
+
+    /// <summary>
+    /// Updates the current number of users that need to be tracked.
+    /// </summary>
+    /// <param name="newNumberOfUsers">The nubmer of users that should be tracked.</param>
+    private void UpdateNumberOfUsers(int newNumberOfUsers)
+    {
+        activeUser1 = null;
+        activeUser2 = null;
     }
 
     #region Initialize Sensor  
@@ -132,7 +260,7 @@ public class BodySourceManager : MonoBehaviour
     {
         while (true)
         {
-            if(IsntValid(kinnectSensor))
+            if (IsntValid(kinnectSensor))
             {
                 InitializeSensor();
             }
@@ -187,14 +315,14 @@ public class BodySourceManager : MonoBehaviour
         {
             kinnectSensor.skeletonFrameReady += OnSkeletonFrameReady;
         }
+    }
 
-        // Initializes the sensor feedback listener
-        var sensorFeedbackHandler = FindObjectOfType<SensorFeedback>();
-        if (sensorFeedbackHandler)
-        {
-            sensorFeedbackHandler.InitializeTexture(kinnectSensor.BodyIndexImageSize);
-            kinnectSensor.bodyIndexFrameReady += sensorFeedbackHandler.OnNewBodyIndexFrame;
-        }
+    public static void RegisterSensorFeedback(SensorFeedback sensorFeedback)
+    {
+        if (Instance == null || Instance.kinnectSensor == null) return;
+
+        sensorFeedback.InitializeTexture(Instance.kinnectSensor.BodyIndexImageSize);
+        Instance.kinnectSensor.bodyIndexFrameReady += sensorFeedback.OnNewBodyIndexFrame;
     }
     #endregion
     #endregion
@@ -279,7 +407,7 @@ public class BodySourceManager : MonoBehaviour
     /// </summary>
     private void TrackUsers()
     {
-        if(numberOfUsersToTrack == 1)
+        if (NumberOfUsersToTrack == 1)
         {
             // TODO Find better way of ensuring users don't steal sensor from each other
             #region Get Kinect Data
@@ -289,30 +417,36 @@ public class BodySourceManager : MonoBehaviour
 
             List<ulong> _trackedIds = new List<ulong>();
 
-            ulong centerID = 0;
+            Skeleton centerSkeleton = null;
             float currentLow = Mathf.Infinity;
+            bool activeDoesntExists = true;
 
             foreach (var skeleton in skeletonData)
             {
                 if (skeleton == null) continue;
 
+                if (activeUser1 != null && skeleton.trackingId == activeUser1.trackingId)
+                {
+                    activeDoesntExists = false;
+                }
+
                 var lowCheck = Mathf.Abs(skeleton.joints[(int)JointType.SpineBase].position.x);
 
                 if (skeleton.IsTracked() && lowCheck < currentLow)
                 {
-                    centerID = skeleton.trackingId;
+                    centerSkeleton = skeleton;
                     currentLow = lowCheck;
                 }
             }
 
-            if (centerID != 0)
+            if (centerSkeleton != null)
             {
-                if(activeUserID == 0)
+                if (activeUser1 == null || activeDoesntExists)
                 {
-                    activeUserID = centerID;
+                    activeUser1 = centerSkeleton;
                 }
 
-                _trackedIds.Add(activeUserID);
+                _trackedIds.Add(centerSkeleton.trackingId);
             }
             #endregion
 
@@ -323,8 +457,9 @@ public class BodySourceManager : MonoBehaviour
             {
                 if (skeleton == null) continue;
 
-                if (skeleton.IsTracked() && skeleton.trackingId == centerID)
+                if (skeleton.IsTracked() && _trackedIds.Contains(skeleton.trackingId))
                 {
+                    activeUser1 = skeleton;
                     SensorDataUpdateEvent.Invoke(skeleton);
                 }
             }
@@ -333,6 +468,93 @@ public class BodySourceManager : MonoBehaviour
         else
         {
             // TODO Do something with more users
+            // TODO Find better way of ensuring users don't steal sensor from each other
+            #region Get Kinect Data
+            ChangeSensorFound(skeletonData != null);
+
+            if (skeletonData == null) return;
+
+            List<ulong> _trackedIds = new List<ulong>();
+
+            Skeleton leftPlayer = null;
+            Skeleton rightPlayer = null;
+
+            float currentLeft = Mathf.Infinity;
+            float currentRight = -Mathf.Infinity;
+
+            foreach (var skeleton in skeletonData)
+            {
+                if (skeleton == null) continue;
+
+                var lowCheck = Mathf.Abs(skeleton.joints[(int)JointType.SpineBase].position.x);
+
+                if (skeleton.IsTracked() && lowCheck > currentRight)
+                {
+                    leftPlayer = skeleton;
+                    currentRight = lowCheck;
+                }
+
+                if (skeleton.IsTracked() && lowCheck < currentLeft)
+                {
+                    rightPlayer = skeleton;
+                    currentLeft = lowCheck;
+                }
+            }
+
+            if (rightPlayer != null)
+            {
+                if (activeUser1 == null)
+                {
+                    activeUser1 = rightPlayer;
+                }
+
+                _trackedIds.Add(activeUser1.trackingId);
+            }
+
+            if (leftPlayer != null && leftPlayer != rightPlayer)
+            {
+                if (activeUser2 == null)
+                {
+                    activeUser2 = leftPlayer;
+                }
+
+                _trackedIds.Add(activeUser2.trackingId);
+            }
+
+            if (activeUser1 == leftPlayer)
+            {
+                activeUser1 = rightPlayer;
+                activeUser2 = leftPlayer;
+            }
+
+            if (activeUser1 == activeUser2)
+            {
+                activeUser2 = null;
+            }
+            #endregion
+
+            #region Create & Refresh Kinect Bodies
+            ChangeUsersFound(_trackedIds.Count);
+
+            foreach (var skeleton in skeletonData)
+            {
+                if (skeleton == null) continue;
+
+                if (skeleton.IsTracked() && _trackedIds.Contains(skeleton.trackingId))
+                {
+                    if (IsPlayerOne(skeleton.trackingId))
+                    {
+                        activeUser1 = skeleton;
+                    }
+                    else
+                    {
+                        activeUser2 = skeleton;
+                    }
+
+                    SensorDataUpdateEvent.Invoke(skeleton);
+                }
+            }
+            #endregion
         }
     }
     #endregion

@@ -74,7 +74,7 @@ public abstract class UIButtonController : MonoBehaviour
     /// Calls for the currently selected button to be updated.
     /// </summary>
     /// <param name="mod">-1 is down and 1 is up.</param>
-    public virtual void UpdateSelectedButton(int mod)
+    public virtual void UpdateSelectedButton(int mod, bool shouldPlaySound = true)
     {
         if (mod != 0)
         {
@@ -99,7 +99,7 @@ public abstract class UIButtonController : MonoBehaviour
     /// </summary>
     public virtual void ClickSlot()
     {
-        UISoundManager.PlayHoverSound();
+        UISoundManager.PlayClickSound();
     }
 
     /// <summary>
