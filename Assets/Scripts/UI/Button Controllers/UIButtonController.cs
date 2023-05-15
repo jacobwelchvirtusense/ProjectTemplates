@@ -20,6 +20,9 @@ public abstract class UIButtonController : MonoBehaviour
     /// </summary>
     protected int currentButtonSlot;
 
+    [Tooltip("The starting button's index for this menu")]
+    [SerializeField] private int startingButtonIndex = 0;
+
     [Tooltip("An event that is fire when the next button is pressed on the controller")]
     [SerializeField]
     private UnityEvent nextEvent = new UnityEvent();
@@ -52,7 +55,7 @@ public abstract class UIButtonController : MonoBehaviour
     /// </summary>
     protected virtual void OnEnable()
     {
-        currentButtonSlot = 0;
+        currentButtonSlot = startingButtonIndex;
         UpdateSelectedButtonReciever(0);
     }
 

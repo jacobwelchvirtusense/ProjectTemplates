@@ -2253,6 +2253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e62e00b4507abe749a0f6e43824e26ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingButtonIndex: 1
   nextEvent:
     m_PersistentCalls:
       m_Calls:
