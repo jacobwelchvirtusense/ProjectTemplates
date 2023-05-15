@@ -57,6 +57,8 @@ public class TimerGameRoutine : IGameRoutine
     /// <returns></returns>
     public override IEnumerator GameplayRoutine()
     {
+        yield return base.GameplayRoutine();
+
         float t = GetTimerAmount();
 
         do

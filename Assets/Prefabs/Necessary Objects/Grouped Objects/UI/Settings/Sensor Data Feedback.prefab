@@ -223,6 +223,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensorDataImage: {fileID: 6289906602824787759}
+  inGameSensorData: {fileID: 0}
+  activeUserPlayer1: 1
   activeUserColor: {r: 0, g: 1, b: 0, a: 1}
   inactiveUserColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   backgroundColor: {r: 0, g: 0, b: 0, a: 0.29411766}

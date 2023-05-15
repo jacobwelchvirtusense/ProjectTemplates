@@ -80,6 +80,8 @@ public class LiveGameRoutine : IGameRoutine
     /// <returns></returns>
     public override IEnumerator GameplayRoutine()
     {
+        yield return base.GameplayRoutine();
+
         while (livesLeft != 0)
         {
             yield return new WaitForEndOfFrame();

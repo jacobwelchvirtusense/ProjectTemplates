@@ -11,11 +11,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using static InspectorValues;
 using static ValidCheck;
 
 public abstract class IGameRoutine : MonoBehaviour
 {
+    #region Fields
+    public UnityEvent StartGameEvent = new UnityEvent();
+    #endregion
+
     #region Functions
     /// <summary>
     /// Sets this routine as the active routine and initializes it.
@@ -26,6 +31,14 @@ public abstract class IGameRoutine : MonoBehaviour
     /// The routine of gameplay to be handled by this class.
     /// </summary>
     /// <returns></returns>
-    public abstract IEnumerator GameplayRoutine();
+    public virtual IEnumerator GameplayRoutine()
+    {
+        StartGameEvent.Invoke();
+
+        if (false)
+        {
+            yield return null;
+        }
+    }
     #endregion
 }

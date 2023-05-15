@@ -70,6 +70,11 @@ public abstract class UIButtonController : MonoBehaviour
         UpdateSelectedButton(mod);
     }
 
+    public void UpdateSelectedButton(int mod)
+    {
+        UpdateSelectedButton(mod, true);
+    }
+
     /// <summary>
     /// Calls for the currently selected button to be updated.
     /// </summary>

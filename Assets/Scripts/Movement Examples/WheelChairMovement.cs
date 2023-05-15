@@ -56,6 +56,10 @@ public class WheelChairMovement : SensorDataListener
     [Tooltip("Inverts the movement inputs of the user")]
     [SerializeField] private bool invertInput;
 
+    [Header("Data Tracking")]
+    [Tooltip("The minimum amount of delta movement before showing an animtion")]
+    [SerializeField] private float minimumDataMovementDelta = 0.0f;
+
     /// <summary>
     /// The position that this object started at.
     /// </summary>
@@ -70,6 +74,16 @@ public class WheelChairMovement : SensorDataListener
     /// The joint to be used in the calculations. Somewhere on the head is likely best for wheel chair users.
     /// </summary>
     private JointType headJoint = JointType.Neck;
+
+    /// <summary>
+    /// The last z position of the user.
+    /// </summary>
+    private Vector2 lastZPosition = Vector2.zero;
+
+    /// <summary>
+    /// The total movement for this user.
+    /// </summary>
+    private float totalMovement = 0.0f;
     #endregion
 
     #region Functions
@@ -80,12 +94,19 @@ public class WheelChairMovement : SensorDataListener
         startingPosition = transform.position;
     }
 
+    private void FixedUpdate()
+    {
+        UseUserData(BodySourceManager.Player1Skeleton);
+    }
+
     /// <summary>
     /// Uses the users data to move their in-game character.
     /// </summary>
     /// <param name="skeleton">The skeleton of the user.</param>
     protected override void UseUserData(Skeleton skeleton)
     {
+        if (skeleton == null) return;
+
         #region Taking input and calculating target position
         var xInput = skeleton.joints[(int)headJoint].position.x;
         var zInput = skeleton.joints[(int)headJoint].position.z;
@@ -126,11 +147,34 @@ public class WheelChairMovement : SensorDataListener
 
         timeOfLastDataFrame = Time.time;
         #endregion
+
+        CalculateUserMoveDelta(new Vector2(xInput, zInput));
     }
 
     private float TimeSinceLastDataFrame()
     {
-        return Time.time - timeOfLastDataFrame;
+        return Time.fixedDeltaTime;
+
+        //return Time.time - timeOfLastDataFrame;
+    }
+
+    private void CalculateUserMoveDelta(Vector2 newLateralMovement)
+    {
+        if (!GameController.GameplayActive) return;
+
+        if (lastZPosition != Vector2.zero)
+        {
+            var xDelta = Mathf.Abs(lastZPosition.x - newLateralMovement.x);
+            var yDelta = Mathf.Abs(lastZPosition.y - newLateralMovement.y);
+
+            if (xDelta+yDelta > minimumDataMovementDelta)
+            {
+                totalMovement += xDelta+yDelta;
+                UIManager.UpdateEndGameData(UIManager.EndGameDataType.MOVEMENT, totalMovement.ToString().Substring(0, 4));
+            }
+        }
+
+        lastZPosition = newLateralMovement;
     }
     #endregion
 }

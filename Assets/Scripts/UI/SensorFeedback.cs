@@ -24,6 +24,12 @@ public class SensorFeedback : SensorDataListener
     [Tooltip("The raw image that is use to display sensor data to the user")]
     [SerializeField] private RawImage sensorDataImage;
 
+    [Tooltip("The paired in game sensor data to this object")]
+    [SerializeField] private GameObject inGameSensorData;
+
+    [Tooltip("If true the active user highlighted will be user 1")]
+    [SerializeField] private bool activeUserPlayer1;
+
     [Tooltip("The color of the actively selected user")]
     [SerializeField] private Color activeUserColor = Color.green;
 
@@ -32,11 +38,6 @@ public class SensorFeedback : SensorDataListener
 
     [Tooltip("The color of background")]
     [SerializeField] private Color backgroundColor = Color.black;
-
-    /// <summary>
-    /// The index of the active user being display in the data visualization.
-    /// </summary>
-    private short activeUserIndex = -1;
 
     /// <summary>
     /// The texture that is being applied to the sensorDataImage.
@@ -109,6 +110,31 @@ public class SensorFeedback : SensorDataListener
         base.Awake();
     }
 
+    private void OnEnable()
+    {
+        if (inGameSensorData)
+            inGameSensorData.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        if (inGameSensorData)
+            inGameSensorData.SetActive(true);
+    }
+
+    private void Start()
+    {
+        BodySourceManager.RegisterSensorFeedback(this);
+    }
+
+    private void FixedUpdate()
+    {
+        if (sensorTexture == null)
+        {
+            BodySourceManager.RegisterSensorFeedback(this);
+        }
+    }
+
     #region Sensor Data Visualization
     /// <summary>
     /// Initializes the sensor data image and its texture.
@@ -139,7 +165,7 @@ public class SensorFeedback : SensorDataListener
     /// <param name="bodyIndexData">The body index data.</param>
     private async void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
     {
-        if (activeUserIndex == -1) return;
+        if (HasNotFoundUser()) return;
         else
         {
             sensorDataImage.color = Color.white;
@@ -152,7 +178,7 @@ public class SensorFeedback : SensorDataListener
 
         await DataVisualizationTask(bodyIndexData);
 
-        if(bodyIndexColors != null && sensorTexture != null)
+        if (bodyIndexColors != null && sensorTexture != null)
         {
             sensorTexture.SetPixels32(bodyIndexColors);
             sensorTexture.Apply();
@@ -170,11 +196,13 @@ public class SensorFeedback : SensorDataListener
         {
             for (int i = 0; i < bodyIndexColors.Length; i++)
             {
-                if (bodyIndexData.Args.Pixels[i] == activeUserIndex)
+                byte index = bodyIndexData.Args.Pixels[i];
+
+                if ((activeUserPlayer1 && BodySourceManager.ActiveIndexPlayerOne(index)) || (!activeUserPlayer1 && BodySourceManager.ActiveIndexPlayerTwo(index)))
                 {
                     bodyIndexColors[i] = activeUserColor;
                 }
-                else if (bodyIndexData.Args.Pixels[i] != 255)
+                else if (index != 255)
                 {
                     bodyIndexColors[i] = inactiveUserColor;
                 }
@@ -226,11 +254,12 @@ public class SensorFeedback : SensorDataListener
     /// <param name="skeleton">The skeleton currently being tracked.</param>
     protected override void UseUserData(Skeleton skeleton)
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy || skeleton == null) return;
 
-        activeUserIndex = skeleton.trackingIndex;
-
-        DisplayFeedback(skeleton.joints[(int)JointType.SpineBase].position);
+        if ((activeUserPlayer1 && BodySourceManager.ActiveIndexPlayerOne(skeleton.trackingIndex)) || (!activeUserPlayer1 && BodySourceManager.ActiveIndexPlayerTwo(skeleton.trackingIndex)))
+        {
+            DisplayFeedback(skeleton.joints[(int)JointType.SpineBase].position);
+        }
     }
 
     /// <summary>

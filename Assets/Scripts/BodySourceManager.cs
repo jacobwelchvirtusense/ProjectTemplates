@@ -16,6 +16,7 @@ using Assets.AzureKinect;
 using Assets.Kinect;
 using Assets.SensorAdapters;
 using System.Linq;
+using System;
 
 public class BodySourceManager : MonoBehaviour
 {
@@ -95,11 +96,13 @@ public class BodySourceManager : MonoBehaviour
     /// </summary>
     private Skeleton activeUser1 = null;
 
-    public Skeleton Player1Skeleton
+    public static Skeleton Player1Skeleton
     {
         get
         {
-            return activeUser1;
+            if (Instance == null) return null;
+
+            return Instance.activeUser1;
         }
     }
 
@@ -108,11 +111,13 @@ public class BodySourceManager : MonoBehaviour
     /// </summary>
     private Skeleton activeUser2 = null;
 
-    public Skeleton Player2Skeleton
+    public static Skeleton Player2Skeleton
     {
         get
         {
-            return activeUser2;
+            if (Instance == null) return null;
+
+            return Instance.activeUser2;
         }
     }
 
@@ -479,6 +484,9 @@ public class BodySourceManager : MonoBehaviour
             Skeleton leftPlayer = null;
             Skeleton rightPlayer = null;
 
+            bool rightPlayerDoesntExist = true;
+            bool leftPlayerDoesntExist = true;
+
             float currentLeft = Mathf.Infinity;
             float currentRight = -Mathf.Infinity;
 
@@ -487,6 +495,16 @@ public class BodySourceManager : MonoBehaviour
                 if (skeleton == null) continue;
 
                 var lowCheck = Mathf.Abs(skeleton.joints[(int)JointType.SpineBase].position.x);
+
+                if (activeUser1 != null && activeUser1.trackingId == skeleton.trackingId)
+                {
+                    rightPlayerDoesntExist = false;
+                }
+
+                if (activeUser2 != null && activeUser2.trackingId == skeleton.trackingId)
+                {
+                    leftPlayerDoesntExist = false;
+                }
 
                 if (skeleton.IsTracked() && lowCheck > currentRight)
                 {
@@ -503,7 +521,7 @@ public class BodySourceManager : MonoBehaviour
 
             if (rightPlayer != null)
             {
-                if (activeUser1 == null)
+                if (activeUser1 == null || rightPlayerDoesntExist)
                 {
                     activeUser1 = rightPlayer;
                 }
@@ -513,7 +531,7 @@ public class BodySourceManager : MonoBehaviour
 
             if (leftPlayer != null && leftPlayer != rightPlayer)
             {
-                if (activeUser2 == null)
+                if (activeUser2 == null || leftPlayerDoesntExist)
                 {
                     activeUser2 = leftPlayer;
                 }

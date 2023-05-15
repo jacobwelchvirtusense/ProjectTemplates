@@ -22,6 +22,8 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private static UIManager Instance;
 
+    public enum EndGameDataType { TIME, MOVEMENT, SCORE }
+
     #region Lives Mode
     [Header("Lives Mode")]
     [Tooltip("The UI parent for the lives based mode")]
@@ -215,24 +217,18 @@ public class UIManager : MonoBehaviour
     /// </summary>
     /// <param name="indexToUpdate">The index between 1-5 to update for end game data.</param>
     /// <param name="newData">The new data to put in the end game display.</param>
-    public static void UpdateEndGameData(int indexToUpdate, string newData)
+    public static void UpdateEndGameData(EndGameDataType dataToUpdate, string newData)
     {
-        switch (indexToUpdate)
+        switch (dataToUpdate)
         {
-            case 1:
+            case EndGameDataType.MOVEMENT:
                 Instance.endGameDisplay1.UpdateText(newData);
                 break;
-            case 2:
+            case EndGameDataType.TIME:
                 Instance.endGameDisplay2.UpdateText(newData);
                 break;
-            case 3:
+            case EndGameDataType.SCORE:
                 Instance.endGameDisplay3.UpdateText(newData);
-                break;
-            case 4:
-                Instance.endGameDisplay4.UpdateText(newData);
-                break;
-            case 5:
-                Instance.endGameDisplay5.UpdateText(newData);
                 break;
             default:
                 break;

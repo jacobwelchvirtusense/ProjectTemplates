@@ -254,8 +254,6 @@ public class GameController : MonoBehaviour
         // Spawns text at score location
         var text = Instantiate(scoreText, location, Quaternion.identity);
         text.GetComponent<ScoreIncrementText>().InitializeScore(actualIncrement);
-
-        DisplayGameData();
     }
 
     /// <summary>
@@ -349,20 +347,8 @@ public class GameController : MonoBehaviour
 
         // Displays all data
         UIManager.DisplayEndScreen();
-        DisplayGameData();
         OutputData();
         PlaySound(audioSource, endSound, endSoundVolume);
-    }
-
-    /// <summary>
-    /// Displays all of the game data in the end game displays.
-    /// </summary>
-    private void DisplayGameData()
-    {
-        UIManager.UpdateEndGameData(2, "Temp Text");
-        UIManager.UpdateEndGameData(3, "Temp Text");
-        UIManager.UpdateEndGameData(4, "Temp Text");
-        UIManager.UpdateEndGameData(5, "Temp Text");
     }
 
     /// <summary>
