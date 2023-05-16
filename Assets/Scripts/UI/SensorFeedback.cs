@@ -165,12 +165,6 @@ public class SensorFeedback : SensorDataListener
     /// <param name="bodyIndexData">The body index data.</param>
     private async void BodyIndexReader_FrameArrived(GenericEventArgs<BodyIndexFrame> bodyIndexData)
     {
-        if (HasNotFoundUser()) return;
-        else
-        {
-            sensorDataImage.color = Color.white;
-        }
-
         if (bodyIndexColors == null || bodyIndexColors.Length != bodyIndexData.Args.PixelCount)
         {
             bodyIndexColors = new Color32[bodyIndexData.Args.PixelCount];
@@ -182,6 +176,8 @@ public class SensorFeedback : SensorDataListener
         {
             sensorTexture.SetPixels32(bodyIndexColors);
             sensorTexture.Apply();
+
+            sensorDataImage.color = Color.white;
         }
     }
 
